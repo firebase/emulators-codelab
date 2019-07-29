@@ -1,7 +1,5 @@
 const firebase = require("@firebase/testing");
-const projectId = "cart-test";
 
-const admin = firebase.initializeAdminApp({ projectId}).firestore();
 const seedItems = {
   "chocolate": 4.99,
   "coffee beans": 12.99,
@@ -14,10 +12,6 @@ const aliceAuth = {
   uid: "alice",
   email: "alice@example.com"
 };
-const db = firebase.initializeTestApp({
-  projectId: projectId,
-  auth: aliceAuth
-}).firestore();
 
 after(() => {
   firebase.apps().forEach(app => app.delete());
@@ -25,6 +19,13 @@ after(() => {
 
 // Unit test the security rules
 describe("shopping cart creation", () => {
+  const projectId = "cart-security-tests";
+  const admin = firebase.initializeAdminApp({ projectId}).firestore();
+  const db = firebase.initializeTestApp({
+    projectId: projectId,
+    auth: aliceAuth
+  }).firestore();
+
   it('can be created by the cart owner', async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart").set({
       ownerUID: "alice",
@@ -58,33 +59,38 @@ describe("shopping cart creation", () => {
   }).timeout(1000);
 });
 
-describe("shopping cart reads, update and deletes", () => {
-  before(() => {
-    // Create Alice's cart
-    admin.doc("carts/alicesCart").set({
-      ownerUID: "alice",
-      total: 0
-    });
+describe("shopping cart reads, updates, and deletes", () => {
+  const projectId = "cart-security-tests";
+  const admin = firebase.initializeAdminApp({ projectId}).firestore();
+  const db = firebase.initializeTestApp({
+    projectId: projectId,
+    auth: aliceAuth
+  }).firestore();
 
-    const aliceItemsRef = admin.doc("carts/alicesCart").collection("items");
-    // Iterate through `seedItems`, and create a document for each one in the
-    // `items` subcollection
-    Object.keys(seedItems).forEach(name => {
-      aliceItemsRef.doc(name).set({ value: seedItems[name] });
-    });
+  // Create Alice's cart
+  admin.doc("carts/alicesCart").set({
+    ownerUID: "alice",
+    total: 0
+  });
 
-    // Create Bart's cart
-    admin.doc("carts/bartsCart").set({
-      ownerUID: "bart",
-      total: 0
-    });
+  // Iterate through `seedItems`, and create a document for each one in the
+  // `items` subcollection
+  const alicesItemsRef = admin.doc("carts/alicesCart").collection("items");
+  Object.keys(seedItems).forEach(name => {
+    alicesItemsRef.doc(name).set({ value: seedItems[name] });
+  });
 
-    const bartsItemsRef = admin.doc("carts/bartsCart").collection("items");
-    // Iterate through `seedItems`, and create a document for each one in the
-    // `items` subcollection
-    Object.keys(seedItems).forEach(name => {
-      bartsItemsRef.doc(name).set({ value: seedItems[name] });
-    });
+  // Create Bart's cart
+  admin.doc("carts/bartsCart").set({
+    ownerUID: "bart",
+    total: 0
+  });
+
+  const bartsItemsRef = admin.doc("carts/bartsCart").collection("items");
+  // Iterate through `seedItems`, and create a document for each one in the
+  // `items` subcollection
+  Object.keys(seedItems).forEach(name => {
+    bartsItemsRef.doc(name).set({ name: name, value: seedItems[name] });
   });
 
   it("cart can be read by the cart owner", async () => {
@@ -106,14 +112,14 @@ describe("shopping cart reads, update and deletes", () => {
   it("items can be added by the cart owner",  async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart/items/lemon").set({
       name: "lemon",
-      price: ".99"
+      price: .99
     }));
   }).timeout(1000);
 
   it("items cannot be updated by a user other than the cart owner", async () => {
     await firebase.assertFails(db.doc("carts/bartsCart/items/lemon").set({
       name: "lemon",
-      price: ".99"
+      price: .99
     }));
   }).timeout(1000);
 
@@ -140,5 +146,41 @@ describe("shopping cart reads, update and deletes", () => {
     await firebase.assertFails(
       db.doc("carts/bartsCart/items/milk").delete()
     );
+  }).timeout(1000);
+});
+
+describe("adding an item to the cart recalculates the cart total. ", () => {
+  it("should sum the cost of their items", async () => {
+    // Setup: Use the actual project id for the Function to fire
+    const projectId = "emulator-codelab-dev";
+    const admin = firebase.initializeAdminApp({ projectId}).firestore();
+    const aliceCartRef = admin.doc("carts/alicesCart")
+
+    // Setup: Create cart
+    aliceCartRef.set({
+      ownerUID: "alice",
+      total: 0
+    });
+
+    // Setup: Add items to cart
+    const aliceItemsRef = admin.doc("carts/alicesCart").collection("items");
+    await aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
+    const items = await aliceItemsRef.get();
+
+    // Expectations
+    const expectedCount = 2;
+    const expectedTotal = 9.98;
+
+    const done = new Promise((resolve, reject) => {
+      aliceCartRef.onSnapshot(snap => {
+        if (snap.data().count === expectedCount && snap.data().total == expectedTotal) {
+          resolve();
+        }
+      })
+    });
+
+    //  Trigger `calculateCart` function
+    await aliceItemsRef.doc("doc2").set({ name: "grapefuit", price: 6.99 });
+    await done;
   }).timeout(1000);
 });
