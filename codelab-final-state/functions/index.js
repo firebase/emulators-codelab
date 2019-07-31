@@ -23,12 +23,12 @@ exports.calculateCart = functions.firestore.document("carts/{cartId}/items/{item
           count += quantity;
           console.log(`Adding ${itemData.name}, which costs ${price} to the total, which is now ${total}.`);
         }
-      console.log("Cart total successfully recaclulated: ", total);
-      return cartRef.set({
-        total: total,
-        count: count
-      }, {merge: true});
     })
+    console.log("Cart total successfully recaclulated: ", total);
+    return cartRef.set({
+      total: total,
+      count: count
+    }, {merge: true});
   } catch(err) {
     console.log("Cart could not be recalculated. ", err);
   }
