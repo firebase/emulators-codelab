@@ -17,8 +17,8 @@ class HomePage {
   itemCardList;
   modalDialog;
 
-  cart = {};
-  cartUnsubscribe;
+  cartItems = {};
+  cartItemsUnsub;
 
   constructor(db, auth) {
     this.db = db;
@@ -28,7 +28,7 @@ class HomePage {
       new HeaderIcon("sign_in", "account_circle", "Sign In", () => {
         this.onSignInClicked();
       }),
-      new HeaderIcon("cart", "shopping_cart", "Cart (0)", () => {
+      new HeaderIcon("cart", "shopping_cart", "N/A", () => {
         this.showCart();
       })
     ]);
@@ -60,7 +60,7 @@ class HomePage {
   listenForItems() {
     this.db
       .collection("items")
-      // .limit(9)
+      .limit(9)
       .onSnapshot(items => {
         if (items.size === 0) {
           createItems(this.db);
@@ -74,9 +74,9 @@ class HomePage {
   async listenForCart(uid) {
     // If we were previously listening to the cart for
     // a different user, unsubscribe.
-    if (this.cartUnsubscribe) {
-      this.cartUnsubscribe();
-      this.cartUnsubscribe = null;
+    if (this.cartItemsUnsub) {
+      this.cartItemsUnsub();
+      this.cartItemsUnsub = null;
     }
 
     // If needed, create the base cart object
@@ -88,9 +88,19 @@ class HomePage {
       { merge: true }
     );
 
+    // Listen for updates to the cart
+    // TODO: Unsub from this as well
+    this.cartUnsub = cartRef.onSnapshot(cart => {
+      console.log("CART", cart.data());
+
+      const total = cart.data().total || 0;
+      const count = cart.data().count || 0;
+      this.headerBar.setIconText("cart", `\$${total.toFixed(2)} (${count})`);
+    });
+
     // Listen for updates to cart items
-    this.cartUnsubscribe = cartRef.collection("items").onSnapshot(cart => {
-      this.setCart(cart);
+    this.cartItemsUnsub = cartRef.collection("items").onSnapshot(items => {
+      this.setCartItems(items);
     });
   }
 
@@ -103,24 +113,26 @@ class HomePage {
   }
 
   setSignedIn(signedIn) {
-    this.headerBar.setIconEnabled("cart", signedIn);
-    this.headerBar.setIconText("sign_in", signedIn ? "Sign Out" : "Sign In");
-
     if (signedIn) {
+      this.headerBar.setIconText("sign_in", "Sign Out");
+      this.headerBar.setIconEnabled("cart", true);
       this.listenForCart(this.auth.currentUser.uid);
     } else {
-      this.setCart(null);
+      this.headerBar.setIconText("sign_in", "Sign In");
+      this.headerBar.setIconText("cart", "N/A");
+      this.headerBar.setIconEnabled("cart", false);
+      this.setCartItems(null);
     }
   }
 
-  setCart(cart) {
+  setCartItems(items) {
     let itemIds;
 
-    if (cart) {
-      this.cart = cart.docs.map(doc => doc.data());
-      itemIds = cart.docs.map(doc => doc.id);
+    if (items) {
+      this.cartItems = items.docs.map(doc => doc.data());
+      itemIds = items.docs.map(doc => doc.id);
     } else {
-      this.cart = [];
+      this.cartItems = [];
       itemIds = [];
     }
 
@@ -129,8 +141,6 @@ class HomePage {
       const inCart = itemIds.indexOf(itemCard.id) >= 0;
       itemCard.setAddEnabled(!inCart);
     });
-
-    this.headerBar.setIconText("cart", `Cart (${this.cart.length})`);
   }
 
   addToCart(id, itemData) {
@@ -153,7 +163,7 @@ class HomePage {
       return;
     }
 
-    const items = this.cart.map(doc => `${doc.name} - ${doc.price}`);
+    const items = this.cartItems.map(doc => `${doc.name} - ${doc.price}`);
     this.modalDialog.setContent(new CartList(items));
     this.modalDialog.show();
   }
