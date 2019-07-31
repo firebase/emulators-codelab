@@ -71,7 +71,7 @@ class HomePage {
       });
   }
 
-  listenForCart(uid) {
+  async listenForCart(uid) {
     // If we were previously listening to the cart for
     // a different user, unsubscribe.
     if (this.cartUnsubscribe) {
@@ -79,13 +79,19 @@ class HomePage {
       this.cartUnsubscribe = null;
     }
 
-    this.cartUnsubscribe = this.db
-      .collection("carts")
-      .doc(uid)
-      .collection("items")
-      .onSnapshot(cart => {
-        this.setCart(cart);
-      });
+    // If needed, create the base cart object
+    const cartRef = this.db.collection("carts").doc(uid);
+    await cartRef.set(
+      {
+        ownerUID: uid
+      },
+      { merge: true }
+    );
+
+    // Listen for updates to cart items
+    this.cartUnsubscribe = cartRef.collection("items").onSnapshot(cart => {
+      this.setCart(cart);
+    });
   }
 
   onSignInClicked() {
