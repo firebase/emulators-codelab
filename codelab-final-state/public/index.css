@@ -28,6 +28,7 @@ body {
   display: grid;
   grid-template-areas: "logo title icons";
   grid-template-columns: auto minmax(0, 1fr) auto auto;
+  padding-top: 10px;
   padding-left: 16px;
   padding-right: 16px;
 }

@@ -9,6 +9,25 @@ import {
   CartList
 } from "./view.js";
 
+export async function onDocumentReady(firebaseApp) {
+  console.log("Firebase Config", JSON.stringify(firebaseApp.options));
+
+  const db = firebaseApp.firestore();
+  const auth = firebaseApp.auth();
+
+  // TODO: remove
+  if (location.hostname === "localhost") {
+    console.log("localhost detected!");
+    db.settings({
+      host: "localhost:8081",
+      ssl: false
+    });
+  }
+
+  const homePage = new HomePage(db, auth);
+  mount(document.body, homePage);
+}
+
 class HomePage {
   db;
   auth;
@@ -33,8 +52,13 @@ class HomePage {
       })
     ]);
 
-    this.itemCardList = new ItemCardList((id, data) => {
-      this.addToCart(id, data);
+    this.itemCardList = new ItemCardList(async (id, data) => {
+      try {
+        await this.addToCart(id, data);
+      } catch (e) {
+        console.warn(e);
+        this.showError("Error adding item to cart");
+      }
     });
 
     this.modalDialog = new ModalDialog("Cart", "Nothing here.");
@@ -58,20 +82,21 @@ class HomePage {
   }
 
   listenForItems() {
-    this.db
-      .collection("items")
-      .limit(9)
-      .onSnapshot(items => {
-        if (items.size === 0) {
-          createItems(this.db);
-          return;
-        }
+    this.db.collection("items").onSnapshot(items => {
+      // Note: for the purposes of this demo we create random items in the database if none exist.
+      // In a real app it would not make sense for the client to do this.
+      if (items.size === 0) {
+        createItems(this.db);
+        return;
+      }
 
-        this.itemCardList.setItems(items);
-      });
+      this.itemCardList.setItems(items);
+    });
   }
 
   async listenForCart(uid) {
+    console.log(`listenForCart(${uid})`);
+
     // If we were previously listening to the cart for
     // a different user, unsubscribe.
     if (this.cartItemsUnsub) {
@@ -91,7 +116,7 @@ class HomePage {
     // Listen for updates to the cart
     // TODO: Unsub from this as well
     this.cartUnsub = cartRef.onSnapshot(cart => {
-      console.log("CART", cart.data());
+      console.log("cart", cart.data());
 
       const total = cart.data().total || 0;
       const count = cart.data().count || 0;
@@ -144,8 +169,9 @@ class HomePage {
   }
 
   addToCart(id, itemData) {
+    // TODO: Remove
     if (this.auth.currentUser === null) {
-      alert("You must be signed in!");
+      this.showError("You must be signed in!");
       return;
     }
 
@@ -167,20 +193,8 @@ class HomePage {
     this.modalDialog.setContent(new CartList(items));
     this.modalDialog.show();
   }
-}
 
-export async function onDocumentReady(fbApp) {
-  console.log("Firebase Config", JSON.stringify(fbApp.options));
-
-  const db = fbApp.firestore();
-  const auth = fbApp.auth();
-
-  // TODO: Figure out some sort of emulator toggle.
-  // db.settings({
-  //   host: "localhost:8081",
-  //   ssl: false
-  // });
-
-  const homePage = new HomePage(db, auth);
-  mount(document.body, homePage);
+  showError(e) {
+    alert(e);
+  }
 }
