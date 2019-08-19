@@ -1,5 +1,11 @@
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // TODO: Remove once emulator auth support is not broken
+    match /{document=**} {
+      allow read, write: if true;
+    }
+
     match /items/{itemID} {
       // TODO: Better rules for Items.
       allow read, create;
