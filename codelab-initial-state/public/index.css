@@ -1,0 +1,199 @@
+/* Copyright 2019 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+
+  background-color: #f2f2f2;
+}
+
+.header-page {
+  height: 100%;
+
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: 100px auto;
+}
+
+#header {
+  color: white;
+  background-color: #039be5;
+  box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.5);
+
+  display: grid;
+  grid-template-areas: "logo title icons";
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  padding-top: 10px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+#header .logo {
+  grid-area: logo;
+  padding: 16px;
+  height: 100%;
+  width: 100px;
+}
+
+#header .logo img {
+  height: 100%;
+  max-height: 100%;
+  margin-left: -4px;
+  margin-top: -4px;
+}
+
+#header .text {
+  grid-area: title;
+  padding: 16px;
+  margin-left: 16px;
+
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#header .text .title {
+  font-size: 22pt;
+  align-self: left, flex-end;
+}
+
+#header .text .subtitle {
+  font-size: 14pt;
+  opacity: 0.8;
+  align-self: left, flex-end;
+  padding-top: 4px;
+}
+
+#header .text p {
+  margin: 0;
+  padding: 0;
+}
+
+#header .icons {
+  grid-area: icons;
+  display: flex;
+}
+
+.labeled-icon {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.labeled-icon i {
+  font-size: 36px;
+}
+
+.labeled-icon p {
+  font-size: 12pt;
+  margin: 0px;
+}
+
+#items {
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(30%, 1fr));
+  grid-template-rows: repeat(auto-fit, 300px);
+
+  height: 100%;
+  margin: 0 auto;
+  margin: 20px;
+}
+
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.card {
+  width: 100% !important;
+}
+
+.card .content {
+  display: grid;
+  grid-template-areas:
+    "text image"
+    "footer image";
+
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+
+  grid-template-columns: 50% 50%;
+  grid-template-rows: 1fr max-content;
+}
+
+.card .content .item-text {
+  grid-area: text;
+  margin: 8px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card .content .item-image {
+  grid-area: image;
+}
+
+.card .content .item-footer {
+  grid-area: footer;
+  margin: 8px;
+}
+
+.card .content .item-image img {
+  height: 100%;
+  width: 100%;
+  max-height: 100%;
+  max-width: 100%;
+
+  object-fit: cover;
+}
+
+.card .content .title {
+  grid-area: title;
+  margin: 8px;
+}
+
+.card .content .text {
+  grid-area: text;
+  margin: 8px;
+  padding: 0;
+}
+
+#modal {
+  width: unset;
+  max-width: 500px;
+}
+
+#modal .mdl-dialog__title {
+  font-size: 18pt;
+}
+
+#modal .mdl-dialog__content {
+  padding: 4px;
+}
+
+#modal .mdl-dialog__actions {
+  padding: 0;
+}

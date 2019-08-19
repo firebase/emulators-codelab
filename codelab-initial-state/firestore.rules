@@ -1,0 +1,7 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /carts/{cartID} {
+      allow read, write: if true;
+    }
+  }
+}
