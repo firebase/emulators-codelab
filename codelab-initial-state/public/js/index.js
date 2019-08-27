@@ -27,17 +27,8 @@ export async function onDocumentReady(firebaseApp) {
   console.log("Firebase Config", JSON.stringify(firebaseApp.options));
 
   const db = firebaseApp.firestore();
+  
   const auth = firebaseApp.auth();
-
-  // TODO: remove
-  if (location.hostname === "localhost") {
-    console.log("localhost detected!");
-    db.settings({
-      host: "localhost:8081",
-      ssl: false
-    });
-  }
-
   const homePage = new HomePage(db, auth);
   mount(document.body, homePage);
 }
@@ -183,12 +174,6 @@ class HomePage {
   }
 
   addToCart(id, itemData) {
-    // TODO: Remove
-    if (this.auth.currentUser === null) {
-      this.showError("You must be signed in!");
-      return;
-    }
-
     console.log("addToCart", id, JSON.stringify(itemData));
     return this.db
       .collection("carts")
