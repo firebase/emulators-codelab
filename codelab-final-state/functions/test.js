@@ -27,10 +27,6 @@ const aliceAuth = {
   email: "alice@example.com"
 };
 
-afterEach(() => {
-  firebase.clearData;
-})
-
 after(() => {
   firebase.apps().forEach(app => app.delete());
 });
@@ -43,6 +39,10 @@ describe("shopping cart creation", () => {
     projectId: projectId,
     auth: aliceAuth
   }).firestore();
+
+  after(() => {
+    firebase.clearFirestoreData({projectId: "emulator-codelab-dev"});
+  });
 
   it('can be created by the cart owner', async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart").set({
@@ -111,6 +111,10 @@ describe("shopping cart reads, updates, and deletes", () => {
     bartsItemsRef.doc(name).set({ name: name, value: seedItems[name] });
   });
 
+  after(() => {
+    firebase.clearFirestoreData({projectId: "emulator-codelab-dev"});
+  });
+
   it("cart can be read by the cart owner", async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart").get());
   }).timeout(1000);
@@ -168,6 +172,10 @@ describe("shopping cart reads, updates, and deletes", () => {
 });
 
 describe("adding an item to the cart recalculates the cart total. ", () => {
+  after(() => {
+    firebase.clearFirestoreData({projectId: "emulator-codelab-dev"});
+  });
+
   it("should sum the cost of their items", async () => {
     // Setup: Use the actual project id for the Function to fire
     const projectId = "emulator-codelab-dev";
