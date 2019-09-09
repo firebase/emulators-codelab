@@ -27,6 +27,10 @@ const aliceAuth = {
   email: "alice@example.com"
 };
 
+afterEach(() => {
+  firebase.clearData;
+})
+
 after(() => {
   firebase.apps().forEach(app => app.delete());
 });
