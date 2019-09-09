@@ -179,17 +179,17 @@ describe("adding an item to the cart recalculates the cart total. ", () => {
   it("should sum the cost of their items", async () => {
     // Setup: Use the actual project id for the Function to fire
     const projectId = "emulator-codelab-dev";
-    const admin = firebase.initializeAdminApp({ projectId}).firestore();
-    const aliceCartRef = admin.doc("carts/alicesCart")
+    const admin = firebase.initializeAdminApp({projectId}).firestore();
+    const aliceCartRef = admin.doc("carts/alice")
 
     // Setup: Create cart
-    aliceCartRef.set({
+    await aliceCartRef.set({
       ownerUID: "alice",
       total: 0
     });
 
     // Setup: Add items to cart
-    const aliceItemsRef = admin.doc("carts/alicesCart").collection("items");
+    const aliceItemsRef = aliceCartRef.collection("items");
     await aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
     const items = await aliceItemsRef.get();
 
@@ -199,7 +199,7 @@ describe("adding an item to the cart recalculates the cart total. ", () => {
 
     const done = new Promise((resolve, reject) => {
       aliceCartRef.onSnapshot(snap => {
-        if (snap.data().count === expectedCount && snap.data().total == expectedTotal) {
+        if (snap.data().itemCount === expectedCount && snap.data().totalPrice == expectedTotal) {
           resolve();
         }
       })
