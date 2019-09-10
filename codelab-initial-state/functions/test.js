@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const FIREBASE_PROJECT_ID = "CHANGE_ME"
+
 const firebase = require("@firebase/testing");
 
 const seedItems = {
@@ -27,21 +29,28 @@ const aliceAuth = {
   email: "alice@example.com"
 };
 
+before(() => {
+  if (FIREBASE_PROJECT_ID === 'CHANGE_ME') {
+    throw new Error('You did not change the FIREBASE_PROJECT_ID variable to be your real firebase project ID!');
+  }
+});
+
 after(() => {
   firebase.apps().forEach(app => app.delete());
 });
 
 // Unit test the security rules
 describe("shopping cart creation", () => {
-  const projectId = "cart-security-tests";
-  const admin = firebase.initializeAdminApp({ projectId}).firestore();
+  const admin = firebase.initializeAdminApp({ 
+    projectId: FIREBASE_PROJECT_ID 
+  }).firestore();
   const db = firebase.initializeTestApp({
-    projectId: projectId,
+    projectId: FIREBASE_PROJECT_ID,
     auth: aliceAuth
   }).firestore();
 
   after(() => {
-    firebase.clearFirestoreData({projectId: "emulator-codelab-dev"});
+    firebase.clearFirestoreData({ projectId: FIREBASE_PROJECT_ID });
   });
 
   it('can be created by the cart owner', async () => {
@@ -78,10 +87,11 @@ describe("shopping cart creation", () => {
 });
 
 describe("shopping cart reads, updates, and deletes", () => {
-  const projectId = "cart-security-tests";
-  const admin = firebase.initializeAdminApp({ projectId}).firestore();
+  const admin = firebase.initializeAdminApp({ 
+    projectId: FIREBASE_PROJECT_ID 
+  }).firestore();
   const db = firebase.initializeTestApp({
-    projectId: projectId,
+    projectId: FIREBASE_PROJECT_ID,
     auth: aliceAuth
   }).firestore();
 
@@ -112,7 +122,7 @@ describe("shopping cart reads, updates, and deletes", () => {
   });
 
   after(() => {
-    firebase.clearFirestoreData({projectId: "emulator-codelab-dev"});
+    firebase.clearFirestoreData({ projectId: FIREBASE_PROJECT_ID });
   });
 
   it("cart can be read by the cart owner", async () => {
@@ -173,13 +183,11 @@ describe("shopping cart reads, updates, and deletes", () => {
 
 // describe("adding an item to the cart recalculates the cart total. ", () => {
 //   after(() => {
-//     firebase.clearFirestoreData({projectId: "emulator-codelab-dev"});
+//     firebase.clearFirestoreData({projectId: FIREBASE_PROJECT_ID });
 //   });
 //
 //   it("should sum the cost of their items", async () => {
-//     // Setup: Use the actual project id for the Function to fire
-//     const projectId = "emulator-codelab-dev";
-//     const admin = firebase.initializeAdminApp({projectId}).firestore();
+//     const admin = firebase.initializeAdminApp({ projectId: FIREBASE_PROJECT_ID }).firestore();
 //     const aliceCartRef = admin.doc("carts/alice")
 //
 //     // Setup: Create cart
