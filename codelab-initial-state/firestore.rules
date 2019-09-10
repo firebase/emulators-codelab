@@ -1,7 +1,16 @@
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
+    match /carts/{cartID} {
+      allow create: if request.auth.uid == request.resource.data.ownerUID;
+      allow read, update, delete: if request.auth.uid == resource.data.ownerUID;
+    }
+    match /carts/{cartID}/items/{itemID} {
+      allow read, write: if get(/databases/$(database)/documents/carts/$(cartID)).data.ownerUID == request.auth.uid;
+    }
+    match /items/{itemID} {
+      allow read; // Users can read items
+      // In a production app, don't allow unconditional write access!
+      allow create; // For the codelab, client app uses this to add seed data.
     }
   }
 }

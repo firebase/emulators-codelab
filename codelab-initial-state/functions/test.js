@@ -11,8 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+const fs = require('fs');
+const path = require("path");
 
-const FIREBASE_PROJECT_ID = "CHANGE_ME"
+const TEST_FIREBASE_PROJECT_ID = "test-firestore-rules-project";
 
 const firebase = require("@firebase/testing");
 
@@ -30,9 +32,14 @@ const aliceAuth = {
 };
 
 before(() => {
-  if (FIREBASE_PROJECT_ID === 'CHANGE_ME') {
-    throw new Error('You did not change the FIREBASE_PROJECT_ID variable to be your real firebase project ID!');
-  }
+  // Load the content of the "firestore.rules" file into the emulator before running the
+  // test suite. This is necessary because we are using a fake Project ID in the tests,
+  // so the rules "hot reloading" behavior which works in the Web App does not apply here.
+  const rulesContent = fs.readFileSync(path.resolve(__dirname, "../firestore.rules"));
+  firebase.loadFirestoreRules({
+    projectId: TEST_FIREBASE_PROJECT_ID,
+    rules: rulesContent
+  });
 });
 
 after(() => {
@@ -41,16 +48,14 @@ after(() => {
 
 // Unit test the security rules
 describe("shopping cart creation", () => {
-  const admin = firebase.initializeAdminApp({ 
-    projectId: FIREBASE_PROJECT_ID 
-  }).firestore();
+
   const db = firebase.initializeTestApp({
-    projectId: FIREBASE_PROJECT_ID,
+    projectId: TEST_FIREBASE_PROJECT_ID,
     auth: aliceAuth
   }).firestore();
 
   after(() => {
-    firebase.clearFirestoreData({ projectId: FIREBASE_PROJECT_ID });
+    firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
   it('can be created by the cart owner', async () => {
@@ -86,43 +91,47 @@ describe("shopping cart creation", () => {
   }).timeout(1000);
 });
 
-describe("shopping cart reads, updates, and deletes", () => {
-  const admin = firebase.initializeAdminApp({ 
-    projectId: FIREBASE_PROJECT_ID 
-  }).firestore();
+describe("shopping cart reads, updates, and deletes", async () => {
+
   const db = firebase.initializeTestApp({
-    projectId: FIREBASE_PROJECT_ID,
+    projectId: TEST_FIREBASE_PROJECT_ID,
     auth: aliceAuth
   }).firestore();
+    
+  before(async () => {
+    const admin = firebase.initializeAdminApp({ 
+      projectId: TEST_FIREBASE_PROJECT_ID 
+    }).firestore();
 
-  // Create Alice's cart
-  admin.doc("carts/alicesCart").set({
-    ownerUID: "alice",
-    total: 0
-  });
+    // Create Alice's cart
+    await admin.doc("carts/alicesCart").set({
+      ownerUID: "alice",
+      total: 0
+    });
 
-  // Iterate through `seedItems`, and create a document for each one in the
-  // `items` subcollection
-  const alicesItemsRef = admin.doc("carts/alicesCart").collection("items");
-  Object.keys(seedItems).forEach(name => {
-    alicesItemsRef.doc(name).set({ value: seedItems[name] });
-  });
+    // Iterate through `seedItems`, and create a document for each one in the
+    // `items` subcollection
+    const alicesItemsRef = admin.doc("carts/alicesCart").collection("items");
+    for (const name of Object.keys(seedItems)) {
+      await alicesItemsRef.doc(name).set({ value: seedItems[name] });
+    }
 
-  // Create Bart's cart
-  admin.doc("carts/bartsCart").set({
-    ownerUID: "bart",
-    total: 0
-  });
+    // Create Bart's cart
+    await admin.doc("carts/bartsCart").set({
+      ownerUID: "bart",
+      total: 0
+    });
 
-  const bartsItemsRef = admin.doc("carts/bartsCart").collection("items");
-  // Iterate through `seedItems`, and create a document for each one in the
-  // `items` subcollection
-  Object.keys(seedItems).forEach(name => {
-    bartsItemsRef.doc(name).set({ name: name, value: seedItems[name] });
+    const bartsItemsRef = admin.doc("carts/bartsCart").collection("items");
+    // Iterate through `seedItems`, and create a document for each one in the
+    // `items` subcollection
+    for (const name of Object.keys(seedItems)) {
+      await bartsItemsRef.doc(name).set({ name: name, value: seedItems[name] });
+    }
   });
 
   after(() => {
-    firebase.clearFirestoreData({ projectId: FIREBASE_PROJECT_ID });
+    firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
   it("cart can be read by the cart owner", async () => {
@@ -183,11 +192,11 @@ describe("shopping cart reads, updates, and deletes", () => {
 
 // describe("adding an item to the cart recalculates the cart total. ", () => {
 //   after(() => {
-//     firebase.clearFirestoreData({projectId: FIREBASE_PROJECT_ID });
+//     firebase.clearFirestoreData({projectId: TEST_FIREBASE_PROJECT_ID });
 //   });
 //
 //   it("should sum the cost of their items", async () => {
-//     const admin = firebase.initializeAdminApp({ projectId: FIREBASE_PROJECT_ID }).firestore();
+//     const admin = firebase.initializeAdminApp({ projectId: TEST_FIREBASE_PROJECT_ID }).firestore();
 //     const aliceCartRef = admin.doc("carts/alice")
 //
 //     // Setup: Create cart
