@@ -53,7 +53,7 @@ describe("shopping cart creation", () => {
       ownerUID: "alice",
       total: 0
     }));
-  }).;
+  });
 
   it("cannot be created by user other than the cart owner", async () => {
     // All requests are being made by Alice; testing that she cannot create
@@ -62,7 +62,7 @@ describe("shopping cart creation", () => {
       ownerUID: "adam",
       items: seedItems
     }));
-  }).;
+  });
 });
 
 describe("shopping cart reads, updates, and deletes", () => {
@@ -180,16 +180,16 @@ describe("cart items creates, reads, updates, and deletes", () => {
       name: "Decaf Coffee Beans",
       price: 12.99,
     }));
-  }).;
+  });
 
   // Item reads
   it("items can be read by the cart owner", async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart/items/milk").get());
-  }).;
+  });
 
   it("items cannot be read by a user other than the cart owner", async () => {
     await firebase.assertFails(db.doc("carts/bartsCart/items/milk").get());
-  }).;
+  });
 
   // Item updates
   it("items can be updated by the cart owner", async () => {
@@ -197,25 +197,25 @@ describe("cart items creates, reads, updates, and deletes", () => {
       name: "lemon",
       price: .99
     }));
-  }).;
+  });
 
   it("items cannot be updated by a user other than the cart owner", async () => {
     await firebase.assertFails(db.doc("carts/bartsCart/items/lemon").set({
       name: "lemon",
       price: .99
     }));
-  }).;
+  });
 
   // Item deletes
   it("items can be deleted by the cart owner", async () => {
     await firebase.assertSucceeds(
       db.doc("carts/alicesCart/items/milk").delete()
     );
-  }).;
+  });
 
   it("items cannot be deleted by a user other than the cart owner", async () => {
     await firebase.assertFails(
       db.doc("carts/bartsCart/items/milk").delete()
     );
-  }).;
+  });
 });

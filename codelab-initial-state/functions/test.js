@@ -63,7 +63,7 @@ describe("shopping cart creation", () => {
       ownerUID: "alice",
       total: 0
     }));
-  }).;
+  });
 });
 
 describe("shopping cart reads, updates, and deletes", async () => {
@@ -90,7 +90,7 @@ describe("shopping cart reads, updates, and deletes", async () => {
 
   it("cart can be read by the cart owner", async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart").get());
-  }).;
+  });
 });
 
 describe("shopping cart items", async () => {
@@ -123,14 +123,14 @@ describe("shopping cart items", async () => {
 
   it("items can be read by the cart owner", async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart/items/milk").get());
-  }).;
+  });
 
   it("items can be added by the cart owner",  async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart/items/lemon").set({
       name: "lemon",
       price: .99
     }));
-  }).;
+  });
 });
 
 describe.skip("adding an item to the cart recalculates the cart total. ", () => {
@@ -168,5 +168,5 @@ describe.skip("adding an item to the cart recalculates the cart total. ", () => 
     //  Trigger `calculateCart` function
     await aliceItemsRef.doc("doc2").set({ name: "grapefuit", price: 6.99 });
     await done;
-  }).;
+  });
 });
