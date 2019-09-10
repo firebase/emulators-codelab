@@ -123,8 +123,8 @@ class HomePage {
     this.cartUnsub = cartRef.onSnapshot(cart => {
       console.log("cart", cart.data());
 
-      const total = cart.data().total || 0;
-      const count = cart.data().count || 0;
+      const total = cart.data().totalPrice || 0;
+      const count = cart.data().itemCount || 0;
       this.headerBar.setIconText("cart", `\$${total.toFixed(2)} (${count})`);
     });
 

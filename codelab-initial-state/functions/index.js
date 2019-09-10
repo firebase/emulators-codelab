@@ -23,8 +23,15 @@ exports.calculateCart = functions.firestore
     .onWrite(async (change, context) => {
       try {
         let totalPrice = 12;
+        let itemCount = 2;
+
         console.log("Cart total successfully recaclulated: ", totalPrice);
-        return totalPrice;
+        const cartRef = db.collection("carts").doc(context.params.cartId);
+
+        return cartRef.update({
+          totalPrice,
+          itemCount
+        });
       } catch(err) {
         console.log("Cart could not be recalculated. ", err);
       }
