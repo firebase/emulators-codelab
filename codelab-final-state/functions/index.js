@@ -31,21 +31,19 @@ exports.calculateCart = functions
         itemsSnap.docs.forEach(item => {
           let itemData = item.data();
           if (itemData.price) {
-            let price = itemData.price;
             // If not specified, the quantity is 1
             let quantity = (itemData.quantity) ? itemData.quantity : 1;
-            totalPrice += (price * quantity);
             itemCount += quantity;
-            console.log(`Adding ${itemData.name}`);
+            totalPrice += (itemData.price * quantity);
           }
         })
-        console.log("Cart total successfully recaclulated: ", totalPrice);
+        console.log("Cart total successfully recalculated: ", totalPrice);
 
         return cartRef.update({
           totalPrice,
           itemCount
         });
       } catch(err) {
-        console.log("Cart could not be recalculated. ", err);
+        console.error("Cart could not be recalculated. ", err);
       }
     });

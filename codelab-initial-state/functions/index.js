@@ -18,14 +18,13 @@ const db = admin.initializeApp().firestore();
 
 // Recalculates the total cost of a cart; triggered when there's a change
 // to any items in a cart.
-exports.calculateCart = functions.firestore
-    .document("carts/{cartId}/items/{itemId}")
+exports.calculateCart = functions
+    .firestore.document("carts/{cartId}/items/{itemId}")
     .onWrite(async (change, context) => {
       try {
-        let totalPrice = 12;
-        let itemCount = 2;
+        let totalPrice = 125.98;
+        let itemCount = 8;
 
-        console.log("Cart total successfully recaclulated: ", totalPrice);
         const cartRef = db.collection("carts").doc(context.params.cartId);
 
         return cartRef.update({
@@ -33,7 +32,5 @@ exports.calculateCart = functions.firestore
           itemCount
         });
       } catch(err) {
-        console.log("Cart could not be recalculated. ", err);
       }
-    }
-);
+    });
