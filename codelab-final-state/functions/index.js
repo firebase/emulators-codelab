@@ -18,26 +18,26 @@ const db = admin.initializeApp().firestore();
 
 // Recalculates the total cost of a cart; triggered when there's a change
 // to any items in a cart.
-exports.calculateCart = functions.firestore
-    .document("carts/{cartId}/items/{itemId}")
+exports.calculateCart = functions
+    .firestore.document("carts/{cartId}/items/{itemId}")
     .onWrite(async (change, context) => {
       try {
-        await db.runTransaction(async (transaction) => {
-          const cartRef = db.collection("carts").doc(context.params.cartId);
-          const itemsSnap = await cartRef.collection("items").get();
-          let totalPrice = 0;
-          let itemCount = 0;
+        let totalPrice = 0;
+        let itemCount = 0;
 
-          itemsSnap.docs.forEach(item => {
-            let itemData = item.data();
-            if (itemData.price) {
-              let price = itemData.price;
-              // If not specified, the quantity is 1
-              let quantity = (itemData.quantity) ? itemData.quantity : 1;
-              totalPrice += (price * quantity);
-              itemCount += quantity;
-              console.log(`Adding ${itemData.name}`);
-            }
+        const cartRef = db.collection("carts").doc(context.params.cartId);
+        const itemsSnap = await cartRef.collection("items").get();
+
+        itemsSnap.docs.forEach(item => {
+          let itemData = item.data();
+          if (itemData.price) {
+            let price = itemData.price;
+            // If not specified, the quantity is 1
+            let quantity = (itemData.quantity) ? itemData.quantity : 1;
+            totalPrice += (price * quantity);
+            itemCount += quantity;
+            console.log(`Adding ${itemData.name}`);
+          }
         })
         console.log("Cart total successfully recaclulated: ", totalPrice);
 
@@ -45,8 +45,7 @@ exports.calculateCart = functions.firestore
           totalPrice,
           itemCount
         });
-      })} catch(err) {
+      } catch(err) {
         console.log("Cart could not be recalculated. ", err);
       }
-    }
-);
+    });

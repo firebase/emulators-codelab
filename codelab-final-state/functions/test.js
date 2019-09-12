@@ -177,36 +177,41 @@ describe("adding an item to the cart recalculates the cart total. ", () => {
   });
 
   it("should sum the cost of their items", async () => {
-    // Setup: Use the actual project id for the Function to fire
-    const projectId = "emulator-codelab-dev";
-    const admin = firebase.initializeAdminApp({projectId}).firestore();
-    const aliceCartRef = admin.doc("carts/alice")
+    const admin = firebase
+        .initializeAdminApp({ projectId: "emulator-codelabs" })
+        .firestore();
 
-    // Setup: Create cart
+    // Setup: Initialize cart
+    const aliceCartRef = admin.doc("carts/alice")
     await aliceCartRef.set({
       ownerUID: "alice",
       total: 0
     });
 
-    // Setup: Add items to cart
-    const aliceItemsRef = aliceCartRef.collection("items");
-    await aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
-    const items = await aliceItemsRef.get();
-
-    // Expectations
-    const expectedCount = 2;
-    const expectedTotal = 9.98;
-
+    // If `done` resolves, the test will pass
     const done = new Promise((resolve, reject) => {
+      // Listen for every update to the cart. Every time an item is added to the
+      // the cart's subcollection of items, the function updates `totalPrice`
+      // and `itemCount` attributes on the cart.
       aliceCartRef.onSnapshot(snap => {
+        console.log("data", JSON.stringify(snap.data()));
+
+        // Text expectations; if the function worked, we will see these values.
+        const expectedCount = 2;
+        const expectedTotal = 9.98;
+
+        // When the `itemCount`and `totalPrice` match the expectations for the
+        // two items added, the promise resolves, and the test passes.
         if (snap.data().itemCount === expectedCount && snap.data().totalPrice == expectedTotal) {
           resolve();
-        }
-      })
+        };
+      });
     });
 
-    //  Trigger `calculateCart` function
+    //  Trigger `calculateCart` by adding a second item to the cart
+    const aliceItemsRef = aliceCartRef.collection("items");
+    await aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
     await aliceItemsRef.doc("doc2").set({ name: "grapefuit", price: 6.99 });
     await done;
-  }).timeout(1000);
+  });
 });
