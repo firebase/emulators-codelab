@@ -93,7 +93,7 @@ describe("shopping cart reads, updates, and deletes", async () => {
   });
 });
 
-describe"shopping cart items", async () => {
+describe("shopping cart items", async () => {
   const db = firebase.initializeTestApp({
     projectId: TEST_FIREBASE_PROJECT_ID,
     auth: aliceAuth
@@ -134,17 +134,21 @@ describe"shopping cart items", async () => {
 });
 
 describe("adding an item to the cart recalculates the cart total. ", () => {
+  let listener;
+
   after(() => {
     firebase.clearFirestoreData({projectId: "emulator-codelab-dev"});
+    // Call the function returned by `onSnapshot` to unsubscribe from updates
+    listener();
   });
 
   it("should sum the cost of their items", async () => {
-    const admin = firebase
+    const db = firebase
         .initializeAdminApp({ projectId: "emulator-codelabs" })
         .firestore();
 
     // Setup: Initialize cart
-    const aliceCartRef = admin.doc("carts/alice")
+    const aliceCartRef = db.doc("carts/alice")
     await aliceCartRef.set({
       ownerUID: "alice",
       total: 0
@@ -152,13 +156,14 @@ describe("adding an item to the cart recalculates the cart total. ", () => {
 
     // If `done` resolves, the test will pass
     const done = new Promise((resolve, reject) => {
+
       // Listen for every update to the cart. Every time an item is added to the
       // the cart's subcollection of items, the function updates `totalPrice`
       // and `itemCount` attributes on the cart.
-      aliceCartRef.onSnapshot(snap => {
-        console.log("data", JSON.stringify(snap.data()));
+      // Returns a function that can be called to unsubscribe the listener.
+      listener = aliceCartRef.onSnapshot(snap => {
 
-        // Text expectations; if the function worked, we will see these values.
+        // If the function worked, these will be cart's final attributes.
         const expectedCount = 2;
         const expectedTotal = 9.98;
 
