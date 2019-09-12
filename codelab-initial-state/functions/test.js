@@ -133,7 +133,7 @@ describe("shopping cart items", async () => {
   });
 });
 
-describe("adding an item to the cart recalculates the cart total. ", () => {
+describe.skip("adding an item to the cart recalculates the cart total. ", () => {
   let listener;
 
   after(() => {
