@@ -140,12 +140,12 @@ describe.skip("adding an item to the cart recalculates the cart total. ", () => 
   after(() => {
     firebase.clearFirestoreData({projectId: REAL_FIREBASE_PROJECT_ID});
     // Call the function returned by `onSnapshot` to unsubscribe from updates
-    listener();
+    listener && listener();
   });
 
   it("should sum the cost of their items", async () => {
     if (REAL_FIREBASE_PROJECT_ID == "changeme") {
-      throw new Exception("Please change the REAL_FIREBASE_PROJECT_ID at the top of the test file");
+      throw new Error("Please change the REAL_FIREBASE_PROJECT_ID at the top of the test file");
     }
     const db = firebase
         .initializeAdminApp({ projectId: REAL_FIREBASE_PROJECT_ID })
