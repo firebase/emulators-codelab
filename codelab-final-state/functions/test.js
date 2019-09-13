@@ -11,6 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+const fs = require('fs');
+const path = require("path");
+
+const TEST_FIREBASE_PROJECT_ID = "test-firestore-rules-project";
+const REAL_FIREBASE_PROJECT_ID = "changeme";
 
 const firebase = require("@firebase/testing");
 
@@ -27,21 +32,31 @@ const aliceAuth = {
   email: "alice@example.com"
 };
 
+before(async () => {
+  // Load the content of the "firestore.rules" file into the emulator before running the
+  // test suite. This is necessary because we are using a fake Project ID in the tests,
+  // so the rules "hot reloading" behavior which works in the Web App does not apply here.
+  const rulesContent = fs.readFileSync(path.resolve(__dirname, "../firestore.rules"));
+  await firebase.loadFirestoreRules({
+    projectId: TEST_FIREBASE_PROJECT_ID,
+    rules: rulesContent
+  });
+});
+
 after(() => {
   firebase.apps().forEach(app => app.delete());
 });
 
 // Unit test the security rules
 describe("shopping cart creation", () => {
-  const projectId = "cart-security-tests";
-  const admin = firebase.initializeAdminApp({ projectId}).firestore();
+
   const db = firebase.initializeTestApp({
-    projectId: projectId,
+    projectId: TEST_FIREBASE_PROJECT_ID,
     auth: aliceAuth
   }).firestore();
 
   after(() => {
-    firebase.clearFirestoreData({projectId: "emulator-codelab-dev"});
+    firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
   it('can be created by the cart owner', async () => {
@@ -49,140 +64,91 @@ describe("shopping cart creation", () => {
       ownerUID: "alice",
       total: 0
     }));
-  }).timeout(1000);
-
-  it('items can be added to a cart by the cart owner', async () => {
-    // Relies on the cart being created in the previous test.
-    await firebase.assertSucceeds(db.doc("carts/alicesCart/items/coffee").set({
-      name: "Decaf Coffee Beans",
-      price: 12.99,
-    }));
-  }).timeout(1000);
-
-  it("cannot be created by user other than the cart owner", async () => {
-    // All requests are being made by Alice; testing that she cannot create
-    // a cart owned by a different user.
-    await firebase.assertFails(db.doc("carts/adamsCart").set({
-      ownerUID: "adam",
-      items: seedItems
-    }));
-  }).timeout(1000);
-
-  it('items cannot be added to a cart by a non-owner', async () => {
-    // Relies on the cart in the previous example being created.
-    await firebase.assertFails(db.doc("carts/adamsCart/items/coffee").set({
-      name: "Decaf Coffee Beans",
-      price: 12.99,
-    }));
-  }).timeout(1000);
+  });
 });
 
-describe("shopping cart reads, updates, and deletes", () => {
-  const projectId = "cart-security-tests";
-  const admin = firebase.initializeAdminApp({ projectId}).firestore();
+describe("shopping cart reads, updates, and deletes", async () => {
   const db = firebase.initializeTestApp({
-    projectId: projectId,
+    projectId: TEST_FIREBASE_PROJECT_ID,
     auth: aliceAuth
   }).firestore();
 
-  // Create Alice's cart
-  admin.doc("carts/alicesCart").set({
-    ownerUID: "alice",
-    total: 0
-  });
+  before(async () => {
+    const admin = firebase.initializeAdminApp({
+      projectId: TEST_FIREBASE_PROJECT_ID
+    }).firestore();
 
-  // Iterate through `seedItems`, and create a document for each one in the
-  // `items` subcollection
-  const alicesItemsRef = admin.doc("carts/alicesCart").collection("items");
-  Object.keys(seedItems).forEach(name => {
-    alicesItemsRef.doc(name).set({ value: seedItems[name] });
-  });
-
-  // Create Bart's cart
-  admin.doc("carts/bartsCart").set({
-    ownerUID: "bart",
-    total: 0
-  });
-
-  const bartsItemsRef = admin.doc("carts/bartsCart").collection("items");
-  // Iterate through `seedItems`, and create a document for each one in the
-  // `items` subcollection
-  Object.keys(seedItems).forEach(name => {
-    bartsItemsRef.doc(name).set({ name: name, value: seedItems[name] });
+    // Create Alice's cart
+    await admin.doc("carts/alicesCart").set({
+      ownerUID: "alice",
+      total: 0
+    });
   });
 
   after(() => {
-    firebase.clearFirestoreData({projectId: "emulator-codelab-dev"});
+    firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
   it("cart can be read by the cart owner", async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart").get());
-  }).timeout(1000);
+  });
+});
+
+describe("shopping cart items", async () => {
+  const db = firebase.initializeTestApp({
+    projectId: TEST_FIREBASE_PROJECT_ID,
+    auth: aliceAuth
+  }).firestore();
+
+  before(async () => {
+    const admin = firebase.initializeAdminApp({
+      projectId: TEST_FIREBASE_PROJECT_ID
+    }).firestore();
+
+    // Create Alice's cart
+    await admin.doc("carts/alicesCart").set({
+      ownerUID: "alice",
+      total: 0
+    });
+
+    // Create Items Subcollection in Alice's Cart
+    const alicesItemsRef = admin.doc("carts/alicesCart").collection("items");
+    for (const name of Object.keys(seedItems)) {
+      await alicesItemsRef.doc(name).set({ value: seedItems[name] });
+    }
+  });
+
+  after(() => {
+    firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
+  });
 
   it("items can be read by the cart owner", async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart/items/milk").get());
-  }).timeout(1000);
-
-  it("cart cannot be read by a user other than the cart owner", async () => {
-    await firebase.assertFails(db.doc("carts/bartsCart").get());
-  }).timeout(1000);
-
-  it("items cannot be read by a user other than the cart owner", async () => {
-    await firebase.assertFails(db.doc("carts/bartsCart/items/milk").get());
-  }).timeout(1000);
+  });
 
   it("items can be added by the cart owner",  async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart/items/lemon").set({
       name: "lemon",
       price: .99
     }));
-  }).timeout(1000);
-
-  it("items cannot be updated by a user other than the cart owner", async () => {
-    await firebase.assertFails(db.doc("carts/bartsCart/items/lemon").set({
-      name: "lemon",
-      price: .99
-    }));
-  }).timeout(1000);
-
-  // The order matters here. Check other reads and writes before deleting a
-  // cart. Delete items before deleting a cart.
-
-  it("items can be deleted by the cart owner", async () => {
-    await firebase.assertSucceeds(
-      db.doc("carts/alicesCart/items/milk").delete()
-    );
-  }).timeout(1000);
-
-  it("cart can be deleted by the cart owner", async () => {
-    await firebase.assertSucceeds(db.doc("carts/alicesCart").delete());
-  }).timeout(1000);
-
-  it("cart cannot be deleted by a user other than the cart owner", async () => {
-    await firebase.assertFails(
-      db.doc("carts/bartsCart").delete()
-    );
-  }).timeout(1000);
-
-  it("items cannot be deleted by a user other than the cart owner", async () => {
-    await firebase.assertFails(
-      db.doc("carts/bartsCart/items/milk").delete()
-    );
-  }).timeout(1000);
+  });
 });
 
 describe("adding an item to the cart recalculates the cart total. ", () => {
   let listener;
 
   after(() => {
-    firebase.clearFirestoreData({projectId: "emulator-codelab-dev"});
+    firebase.clearFirestoreData({projectId: REAL_FIREBASE_PROJECT_ID});
     // Call the function returned by `onSnapshot` to unsubscribe from updates
     listener();
   });
 
   it("should sum the cost of their items", async () => {
+    if (REAL_FIREBASE_PROJECT_ID == "changeme") {
+      throw new Exception("Please change the REAL_FIREBASE_PROJECT_ID at the top of the test file");
+    }
     const db = firebase
-        .initializeAdminApp({ projectId: "emulator-codelabs" })
+        .initializeAdminApp({ projectId: REAL_FIREBASE_PROJECT_ID })
         .firestore();
 
     // Setup: Initialize cart
