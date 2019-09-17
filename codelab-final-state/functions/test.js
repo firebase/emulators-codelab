@@ -15,6 +15,8 @@ const fs = require('fs');
 const path = require("path");
 
 const TEST_FIREBASE_PROJECT_ID = "test-firestore-rules-project";
+
+// TODO: Change this to your real Firebase Project ID
 const REAL_FIREBASE_PROJECT_ID = "changeme";
 
 const firebase = require("@firebase/testing");
@@ -23,9 +25,6 @@ const seedItems = {
   "chocolate": 4.99,
   "coffee beans": 12.99,
   "milk": 5.99
-};
-const newItem = {
-  "strawberries": 6.99
 };
 const aliceAuth = {
   uid: "alice",
@@ -137,6 +136,12 @@ describe("shopping cart items", async () => {
 describe("adding an item to the cart recalculates the cart total. ", () => {
   let listener;
 
+  before(() => {
+    if (REAL_FIREBASE_PROJECT_ID === "changeme") {
+      throw new Error("Please change the REAL_FIREBASE_PROJECT_ID at the top of the test file");
+    }
+  });
+
   after(() => {
     firebase.clearFirestoreData({projectId: REAL_FIREBASE_PROJECT_ID});
     // Call the function returned by `onSnapshot` to unsubscribe from updates
@@ -144,9 +149,6 @@ describe("adding an item to the cart recalculates the cart total. ", () => {
   });
 
   it("should sum the cost of their items", async () => {
-    if (REAL_FIREBASE_PROJECT_ID === "changeme") {
-      throw new Error("Please change the REAL_FIREBASE_PROJECT_ID at the top of the test file");
-    }
     const db = firebase
         .initializeAdminApp({ projectId: REAL_FIREBASE_PROJECT_ID })
         .firestore();
