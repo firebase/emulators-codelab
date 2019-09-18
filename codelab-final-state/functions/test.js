@@ -26,6 +26,7 @@ const seedItems = {
   "coffee beans": 12.99,
   "milk": 5.99
 };
+
 const aliceAuth = {
   uid: "alice",
   email: "alice@example.com"
@@ -55,6 +56,7 @@ describe("shopping cart creation", () => {
   }).firestore();
 
   after(() => {
+    // Clear data from the emulator
     firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
@@ -85,6 +87,7 @@ describe("shopping cart reads, updates, and deletes", async () => {
   });
 
   after(() => {
+    // Clear data from the emulator
     firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
@@ -118,6 +121,7 @@ describe("shopping cart items", async () => {
   });
 
   after(() => {
+    // Clear data from the emulator
     firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
@@ -134,57 +138,45 @@ describe("shopping cart items", async () => {
 });
 
 describe("adding an item to the cart recalculates the cart total. ", () => {
-  let listener;
+  let unsubscribe;
 
-  before(() => {
-    if (REAL_FIREBASE_PROJECT_ID === "changeme") {
-      throw new Error("Please change the REAL_FIREBASE_PROJECT_ID at the top of the test file");
+  after(() => {
+    // Clear data from the emulator
+    firebase.clearFirestoreData({projectId: REAL_FIREBASE_PROJECT_ID});
+    // Call the function returned by `onSnapshot` to unsubscribe from updates
+    if (unsubscribe) {
+      unsubscribe();
     }
   });
 
-  after(() => {
-    firebase.clearFirestoreData({projectId: REAL_FIREBASE_PROJECT_ID});
-    // Call the function returned by `onSnapshot` to unsubscribe from updates
-    listener && listener();
-  });
-
-  it("should sum the cost of their items", async () => {
+  it("should sum the cost of their items", (done) => {
     const db = firebase
         .initializeAdminApp({ projectId: REAL_FIREBASE_PROJECT_ID })
         .firestore();
 
     // Setup: Initialize cart
     const aliceCartRef = db.doc("carts/alice")
-    await aliceCartRef.set({
-      ownerUID: "alice",
-      total: 0
-    });
+    aliceCartRef.set({ ownerUID: "alice", totalPrice: 0 });
 
-    // If `done` resolves, the test will pass
-    const done = new Promise((resolve, reject) => {
-
-      // Listen for every update to the cart. Every time an item is added to the
-      // the cart's subcollection of items, the function updates `totalPrice`
-      // and `itemCount` attributes on the cart.
-      // Returns a function that can be called to unsubscribe the listener.
-      listener = aliceCartRef.onSnapshot(snap => {
-
-        // If the function worked, these will be cart's final attributes.
-        const expectedCount = 2;
-        const expectedTotal = 9.98;
-
-        // When the `itemCount`and `totalPrice` match the expectations for the
-        // two items added, the promise resolves, and the test passes.
-        if (snap.data().itemCount === expectedCount && snap.data().totalPrice === expectedTotal) {
-          resolve();
-        }
-      });
-    });
-
-    //  Trigger `calculateCart` by adding a second item to the cart
+    //  Trigger `calculateCart` by adding items to the cart
     const aliceItemsRef = aliceCartRef.collection("items");
-    await aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
-    await aliceItemsRef.doc("doc2").set({ name: "grapefuit", price: 6.99 });
-    await done;
+    aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
+    aliceItemsRef.doc("doc2").set({ name: "grapefuit", price: 6.99 });
+
+    // Listen for every update to the cart. Every time an item is added to
+    // the cart's subcollection of items, the function updates `totalPrice`
+    // and `itemCount` attributes on the cart.
+    // Returns a function that can be called to unsubscribe the listener.
+    unsubscribe = aliceCartRef.onSnapshot(snap => {
+      // If the function worked, these will be cart's final attributes.
+      const expectedCount = 2;
+      const expectedTotal = 9.98;
+
+      // When the `itemCount`and `totalPrice` match the expectations for the
+      // two items added, the promise resolves, and the test passes.
+      if (snap.data().itemCount === expectedCount && snap.data().totalPrice == expectedTotal) {
+        done();
+      };
+    });
   });
 });
