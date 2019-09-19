@@ -162,7 +162,7 @@ describe("adding an item to the cart recalculates the cart total. ", () => {
     //  Trigger `calculateCart` by adding items to the cart
     const aliceItemsRef = aliceCartRef.collection("items");
     aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
-    aliceItemsRef.doc("doc2").set({ name: "grapefuit", price: 6.99 });
+    aliceItemsRef.doc("doc2").set({ name: "grapefruit", price: 6.99 });
 
     // Listen for every update to the cart. Every time an item is added to
     // the cart's subcollection of items, the function updates `totalPrice`
