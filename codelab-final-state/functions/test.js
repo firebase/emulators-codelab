@@ -47,8 +47,9 @@ after(() => {
   firebase.apps().forEach(app => app.delete());
 });
 
+
 // Unit test the security rules
-describe("shopping cart creation", () => {
+describe("shopping carts", () => {
 
   const db = firebase.initializeTestApp({
     projectId: TEST_FIREBASE_PROJECT_ID,
@@ -68,7 +69,7 @@ describe("shopping cart creation", () => {
   });
 });
 
-describe("shopping cart reads, updates, and deletes", async () => {
+describe("shopping carts", async () => {
   const db = firebase.initializeTestApp({
     projectId: TEST_FIREBASE_PROJECT_ID,
     auth: aliceAuth
@@ -91,7 +92,7 @@ describe("shopping cart reads, updates, and deletes", async () => {
     firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
-  it("cart can be read by the cart owner", async () => {
+  it("can be read, updated, and deleted by the cart owner", async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart").get());
   });
 });
@@ -125,11 +126,11 @@ describe("shopping cart items", async () => {
     firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
-  it("items can be read by the cart owner", async () => {
+  it("can be read by the cart owner", async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart/items/milk").get());
   });
 
-  it("items can be added by the cart owner",  async () => {
+  it("can be added by the cart owner",  async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart/items/lemon").set({
       name: "lemon",
       price: 0.99
