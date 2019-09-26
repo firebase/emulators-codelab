@@ -21,9 +21,9 @@ const db = admin.initializeApp().firestore();
 exports.calculateCart = functions
     .firestore.document("carts/{cartId}/items/{itemId}")
     .onWrite(async (change, context) => {
+      let totalPrice = 125.98;
+      let itemCount = 8;
       try {
-        let totalPrice = 125.98;
-        let itemCount = 8;
 
         const cartRef = db.collection("carts").doc(context.params.cartId);
 
