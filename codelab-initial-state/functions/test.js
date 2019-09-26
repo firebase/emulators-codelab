@@ -125,23 +125,15 @@ describe("shopping cart items", async () => {
     firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
-<<<<<<< HEAD
-  it("items can be added by the cart owner",  async () => {
-=======
   it("can be read by the cart owner", async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart/items/milk").get());
   });
 
   it("can be added by the cart owner",  async () => {
->>>>>>> c8c86cedb6164063ee3e9ff818bfda2df8462be6
     await firebase.assertSucceeds(db.doc("carts/alicesCart/items/lemon").set({
       name: "lemon",
       price: 0.99
     }));
-  });
-
-  it("items can be read by the cart owner", async () => {
-    await firebase.assertSucceeds(db.doc("carts/alicesCart/items/milk").get());
   });
 });
 
