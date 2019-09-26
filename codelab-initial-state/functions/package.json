@@ -11,7 +11,7 @@
     "test": "mocha"
   },
   "engines": {
-    "node": "10"
+    "node": "8"
   },
   "dependencies": {
     "file-system": "^2.2.2",

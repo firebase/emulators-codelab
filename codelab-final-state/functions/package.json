@@ -8,10 +8,10 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "mocha --reporter=reporter.js"
+    "test": "mocha"
   },
   "engines": {
-    "node": "10"
+    "node": "8"
   },
   "dependencies": {
     "file-system": "^2.2.2",

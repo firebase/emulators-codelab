@@ -15,6 +15,8 @@ const fs = require('fs');
 const path = require("path");
 
 const TEST_FIREBASE_PROJECT_ID = "test-firestore-rules-project";
+
+// TODO: Change this to your real Firebase Project ID
 const REAL_FIREBASE_PROJECT_ID = "changeme";
 
 const firebase = require("@firebase/testing");
@@ -24,9 +26,7 @@ const seedItems = {
   "coffee beans": 12.99,
   "milk": 5.99
 };
-const newItem = {
-  "strawberries": 6.99
-};
+
 const aliceAuth = {
   uid: "alice",
   email: "alice@example.com"
@@ -48,7 +48,7 @@ after(() => {
 });
 
 // Unit test the security rules
-describe("shopping cart creation", () => {
+describe("shopping carts", () => {
 
   const db = firebase.initializeTestApp({
     projectId: TEST_FIREBASE_PROJECT_ID,
@@ -68,7 +68,7 @@ describe("shopping cart creation", () => {
   });
 });
 
-describe("shopping cart reads, updates, and deletes", async () => {
+describe("shopping carts", async () => {
   const db = firebase.initializeTestApp({
     projectId: TEST_FIREBASE_PROJECT_ID,
     auth: aliceAuth
@@ -91,7 +91,7 @@ describe("shopping cart reads, updates, and deletes", async () => {
     firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
-  it("cart can be read by the cart owner", async () => {
+  it("can be read, updated, and deleted by the cart owner", async () => {
     await firebase.assertSucceeds(db.doc("carts/alicesCart").get());
   });
 });
@@ -125,10 +125,18 @@ describe("shopping cart items", async () => {
     firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
+<<<<<<< HEAD
   it("items can be added by the cart owner",  async () => {
+=======
+  it("can be read by the cart owner", async () => {
+    await firebase.assertSucceeds(db.doc("carts/alicesCart/items/milk").get());
+  });
+
+  it("can be added by the cart owner",  async () => {
+>>>>>>> c8c86cedb6164063ee3e9ff818bfda2df8462be6
     await firebase.assertSucceeds(db.doc("carts/alicesCart/items/lemon").set({
       name: "lemon",
-      price: .99
+      price: 0.99
     }));
   });
 
@@ -138,14 +146,14 @@ describe("shopping cart items", async () => {
 });
 
 describe.skip("adding an item to the cart recalculates the cart total. ", () => {
-  let listener;
+  let unsubscribe;
 
   after(() => {
     // Clear data from the emulator
     firebase.clearFirestoreData({projectId: REAL_FIREBASE_PROJECT_ID});
     // Call the function returned by `onSnapshot` to unsubscribe from updates
-    if (listener) {
-      listener();
+    if (unsubscribe) {
+      unsubscribe();
     }
   });
 
@@ -160,12 +168,12 @@ describe.skip("adding an item to the cart recalculates the cart total. ", () => 
 
     // Setup: Initialize cart
     const aliceCartRef = db.doc("carts/alice")
-    aliceCartRef.set({ ownerUID: "alice", total: 0 });
+    aliceCartRef.set({ ownerUID: "alice", totalPrice: 0 });
 
     //  Trigger `calculateCart` by adding items to the cart
     const aliceItemsRef = aliceCartRef.collection("items");
     aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
-    aliceItemsRef.doc("doc2").set({ name: "grapefuit", price: 6.99 });
+    aliceItemsRef.doc("doc2").set({ name: "grapefruit", price: 6.99 });
 
     // Listen for every update to the cart. Every time an item is added to
     // the cart's subcollection of items, the function updates `totalPrice`
