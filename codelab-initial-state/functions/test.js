@@ -151,7 +151,7 @@ describe.skip("adding an item to the cart recalculates the cart total. ", () => 
 
   it("should sum the cost of their items", (done) => {
     if (REAL_FIREBASE_PROJECT_ID == "changeme") {
-      throw new Exception("Please change the REAL_FIREBASE_PROJECT_ID at the top of the test file");
+      throw new Error("Please change the REAL_FIREBASE_PROJECT_ID at the top of the test file");
     }
 
     const db = firebase
