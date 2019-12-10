@@ -30,7 +30,7 @@ export async function onDocumentReady(firebaseApp) {
   if (location.hostname === "localhost") {
     console.log("localhost detected!");
     db.settings({
-      host: "localhost:8081",
+      host: "localhost:8080",
       ssl: false
     });
   }
