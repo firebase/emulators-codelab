@@ -52,6 +52,7 @@ body {
   padding: 16px;
   height: 100%;
   width: 100px;
+  overflow: hidden;
 }
 
 #header .logo img {
