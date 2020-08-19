@@ -10,8 +10,6 @@ service cloud.firestore {
     }
     match /items/{itemID} {
       allow read; // Users can read items
-      // In a production app, don't allow unconditional write access!
-      allow create; // For the codelab, client app uses this to add seed data.
     }
   }
 }

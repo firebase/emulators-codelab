@@ -6,9 +6,8 @@ service cloud.firestore {
     }
     // Items available to add to the cart
     match /items/{itemID} {
+      // Users can read items
       allow read; // Users can read items
-      // Never do this in production
-      allow create; // Client app creates seed data to create a smooth codelab
     }
   }
 }
