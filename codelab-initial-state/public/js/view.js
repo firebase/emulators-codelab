@@ -87,7 +87,11 @@ export class ItemCardList {
       return new ItemCard(item, this.callback);
     });
 
-    setChildren(this.el, this.itemCards);
+    if (this.itemCards.length > 0) {
+      setChildren(this.el, this.itemCards);
+    } else {
+      setChildren(this.el, el("div", "There's nothing here ... did you remember to start the emulators with --import?"));
+    }
   }
 
   getAll() {
