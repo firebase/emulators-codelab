@@ -32,6 +32,11 @@ const aliceAuth = {
   email: "alice@example.com"
 };
 
+const bobAuth = {
+  uid: "bob",
+  email: "bob@example.com"
+};
+
 before(async () => {
   // Load the content of the "firestore.rules" file into the emulator before running the
   // test suite. This is necessary because we are using a fake Project ID in the tests,
@@ -50,9 +55,18 @@ after(() => {
 // Unit test the security rules
 describe("shopping carts", () => {
 
-  const db = firebase.initializeTestApp({
+  const aliceDb = firebase.initializeTestApp({
     projectId: TEST_FIREBASE_PROJECT_ID,
     auth: aliceAuth
+  }).firestore();
+
+  const bobDb = firebase.initializeTestApp({
+    projectId: TEST_FIREBASE_PROJECT_ID,
+    auth: bobAuth
+  }).firestore();
+
+  const admin = firebase.initializeAdminApp({
+    projectId: TEST_FIREBASE_PROJECT_ID
   }).firestore();
 
   after(() => {
@@ -60,46 +74,54 @@ describe("shopping carts", () => {
     firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
-  it('can be created by the cart owner', async () => {
-    await firebase.assertSucceeds(db.doc("carts/alicesCart").set({
+  it('can be created and updated by the cart owner', async () => {
+    // Alice can create her own cart
+    await firebase.assertSucceeds(aliceDb.doc("carts/alicesCart").set({
       ownerUID: "alice",
       total: 0
     }));
+
+    // Bob can't create Alice's cart
+    await firebase.assertFails(bobDb.doc("carts/alicesCart").set({
+      ownerUID: "alice",
+      total: 0
+    }));
+
+    // Alice can update her own cart with a new total
+    await firebase.assertSucceeds(aliceDb.doc("carts/alicesCart").update({
+      total: 1
+    }));
+
+    // Bob can't update Alice's cart with a new total
+    await firebase.assertFails(bobDb.doc("carts/alicesCart").update({
+      total: 1
+    }));
   });
-});
 
-describe("shopping carts", async () => {
-  const db = firebase.initializeTestApp({
-    projectId: TEST_FIREBASE_PROJECT_ID,
-    auth: aliceAuth
-  }).firestore();
-
-  before(async () => {
-    const admin = firebase.initializeAdminApp({
-      projectId: TEST_FIREBASE_PROJECT_ID
-    }).firestore();
-
-    // Create Alice's cart
+  it("can be read only by the cart owner", async () => {
+    // Setup: Create Alice's cart as admin
     await admin.doc("carts/alicesCart").set({
       ownerUID: "alice",
       total: 0
     });
-  });
 
-  after(() => {
-    // Clear data from the emulator
-    firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
-  });
+    // Alice can read her own cart
+    await firebase.assertSucceeds(aliceDb.doc("carts/alicesCart").get());
 
-  it("can be read, updated, and deleted by the cart owner", async () => {
-    await firebase.assertSucceeds(db.doc("carts/alicesCart").get());
+    // Bob can't read Alice's cart
+    await firebase.assertFails(bobDb.doc("carts/alicesCart").get());
   });
 });
 
 describe("shopping cart items", async () => {
-  const db = firebase.initializeTestApp({
+  const aliceDb = firebase.initializeTestApp({
     projectId: TEST_FIREBASE_PROJECT_ID,
     auth: aliceAuth
+  }).firestore();
+
+  const bobDb = firebase.initializeTestApp({
+    projectId: TEST_FIREBASE_PROJECT_ID,
+    auth: bobAuth
   }).firestore();
 
   before(async () => {
@@ -108,13 +130,14 @@ describe("shopping cart items", async () => {
     }).firestore();
 
     // Create Alice's cart
-    await admin.doc("carts/alicesCart").set({
+    const aliceCartRef = admin.doc("carts/alicesCart");
+    await aliceCartRef.set({
       ownerUID: "alice",
       total: 0
     });
 
-    // Create Items Subcollection in Alice's Cart
-    const alicesItemsRef = admin.doc("carts/alicesCart").collection("items");
+    // Create items subcollection in Alice's Cart
+    const alicesItemsRef = aliceCartRef.collection("items");
     for (const name of Object.keys(seedItems)) {
       await alicesItemsRef.doc(name).set({ value: seedItems[name] });
     }
@@ -125,12 +148,23 @@ describe("shopping cart items", async () => {
     firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
   });
 
-  it("can be read by the cart owner", async () => {
-    await firebase.assertSucceeds(db.doc("carts/alicesCart/items/milk").get());
+  it("can be read only by the cart owner", async () => {
+    // Alice can read items in her own cart
+    await firebase.assertSucceeds(aliceDb.doc("carts/alicesCart/items/milk").get());
+
+    // Bob can't read items in alice's cart
+    await firebase.assertFails(bobDb.doc("carts/alicesCart/items/milk").get())
   });
 
-  it("can be added by the cart owner",  async () => {
-    await firebase.assertSucceeds(db.doc("carts/alicesCart/items/lemon").set({
+  it("can be added only by the cart owner",  async () => {
+    // Alice can add an item to her own cart
+    await firebase.assertSucceeds(aliceDb.doc("carts/alicesCart/items/lemon").set({
+      name: "lemon",
+      price: 0.99
+    }));
+
+    // Bob can't add an item to alice's cart
+    await firebase.assertFails(bobDb.doc("carts/alicesCart/items/lemon").set({
       name: "lemon",
       price: 0.99
     }));
@@ -183,5 +217,4 @@ describe.skip("adding an item to the cart recalculates the cart total. ", () => 
       };
     });
   });
-
 });
