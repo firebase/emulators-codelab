@@ -17,7 +17,7 @@ const path = require("path");
 const TEST_FIREBASE_PROJECT_ID = "test-firestore-rules-project";
 
 // TODO: Change this to your real Firebase Project ID
-const REAL_FIREBASE_PROJECT_ID = "changeme";
+const REAL_FIREBASE_PROJECT_ID = "example";
 
 const firebase = require("@firebase/testing");
 
@@ -66,34 +66,6 @@ describe("shopping carts", () => {
       ownerUID: "alice",
       total: 0
     }));
-  });
-});
-
-describe("shopping carts", async () => {
-  const db = firebase.initializeTestApp({
-    projectId: TEST_FIREBASE_PROJECT_ID,
-    auth: aliceAuth
-  }).firestore();
-
-  before(async () => {
-    const admin = firebase.initializeAdminApp({
-      projectId: TEST_FIREBASE_PROJECT_ID
-    }).firestore();
-
-    // Create Alice's cart
-    await admin.doc("carts/alicesCart").set({
-      ownerUID: "alice",
-      total: 0
-    });
-  });
-
-  after(() => {
-    // Clear data from the emulator
-    firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
-  });
-
-  it("can be read, updated, and deleted by the cart owner", async () => {
-    await firebase.assertSucceeds(db.doc("carts/alicesCart").get());
   });
 });
 
