@@ -69,9 +69,8 @@ describe("shopping carts", () => {
     projectId: TEST_FIREBASE_PROJECT_ID
   }).firestore();
 
-  after(() => {
-    // Clear data from the emulator
-    firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
+  after(async () => {
+    await clearCartsAndCartItems(admin);
   });
 
   it('can be created and updated by the cart owner', async () => {
@@ -114,6 +113,10 @@ describe("shopping carts", () => {
 });
 
 describe("shopping cart items", async () => {
+  const admin = firebase.initializeAdminApp({
+    projectId: TEST_FIREBASE_PROJECT_ID
+  }).firestore();
+
   const aliceDb = firebase.initializeTestApp({
     projectId: TEST_FIREBASE_PROJECT_ID,
     auth: aliceAuth
@@ -125,10 +128,6 @@ describe("shopping cart items", async () => {
   }).firestore();
 
   before(async () => {
-    const admin = firebase.initializeAdminApp({
-      projectId: TEST_FIREBASE_PROJECT_ID
-    }).firestore();
-
     // Create Alice's cart
     const aliceCartRef = admin.doc("carts/alicesCart");
     await aliceCartRef.set({
@@ -143,9 +142,8 @@ describe("shopping cart items", async () => {
     }
   });
 
-  after(() => {
-    // Clear data from the emulator
-    firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
+  after(async () => {
+    await clearCartsAndCartItems(admin);
   });
 
   it("can be read only by the cart owner", async () => {
@@ -174,9 +172,13 @@ describe("shopping cart items", async () => {
 describe.skip("adding an item to the cart recalculates the cart total. ", () => {
   let unsubscribe;
 
-  after(() => {
-    // Clear data from the emulator
-    firebase.clearFirestoreData({projectId: REAL_FIREBASE_PROJECT_ID});
+  const admin = firebase.initializeAdminApp({
+    projectId: REAL_FIREBASE_PROJECT_ID
+  }).firestore();
+
+  after(async () => {
+    await clearCartsAndCartItems(admin);
+
     // Call the function returned by `onSnapshot` to unsubscribe from updates
     if (unsubscribe) {
       unsubscribe();
@@ -218,3 +220,23 @@ describe.skip("adding an item to the cart recalculates the cart total. ", () => 
     });
   });
 });
+
+/**
+ * Clear all test data.
+ * @param {firebase.firestore.Firestore} db 
+ */
+async function clearCartsAndCartItems(db) {
+  // Note: normally we could call "firebase.clearFirestoreData()" from the testing library but
+  // we don't want to clear the whole database, we want to leave the "items" collection intact
+  const deleteBatch = db.batch();
+  const carts = await db.collection('carts').get();
+  for (const cart of carts.docs) {
+    deleteBatch.delete(cart.ref);
+    const cartItems = await cart.ref.collection('items').get();
+    for (const item of cartItems.docs) {
+      deleteBatch.delete(item.ref)
+    }
+  }
+
+  await deleteBatch.commit();
+}
