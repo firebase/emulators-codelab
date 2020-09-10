@@ -38,14 +38,14 @@ after(() => {
 
 describe("shopping cart creation", () => {
   const projectId = "cart-security-tests";
-  const admin = firebase.initializeAdminApp({ projectId}).firestore();
+  const admin = firebase.initializeAdminApp({ projectId }).firestore();
   const db = firebase.initializeTestApp({
     projectId: projectId,
     auth: aliceAuth
   }).firestore();
 
-  after(() => {
-    firebase.clearFirestoreData({projectId: "emulator-codelab-dev"});
+  after(async () => {
+    await clearCartsAndCartItems(admin);
   });
 
   it('can be created by the cart owner', async () => {
@@ -71,11 +71,11 @@ describe("shopping cart reads, updates, and deletes", () => {
     auth: aliceAuth
   }).firestore();
 
-  before(async () => {
-    const admin = firebase.initializeAdminApp({
-      projectId: TEST_FIREBASE_PROJECT_ID
-    }).firestore();
+  const admin = firebase.initializeAdminApp({
+    projectId: TEST_FIREBASE_PROJECT_ID
+  }).firestore();
 
+  before(async () => {
     // Create Alice's cart
     await admin.doc("carts/alicesCart").set({
       ownerUID: "alice",
@@ -89,8 +89,8 @@ describe("shopping cart reads, updates, and deletes", () => {
     });
   });
 
-  after(() => {
-    firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
+  after(async () => {
+    await clearCartsAndCartItems(admin);
   });
 
   // Cart reads
@@ -133,11 +133,11 @@ describe("cart items creates, reads, updates, and deletes", () => {
     auth: aliceAuth
   }).firestore();
 
-  before(async () => {
-    const admin = firebase.initializeAdminApp({
-      projectId: TEST_FIREBASE_PROJECT_ID
-    }).firestore();
+  const admin = firebase.initializeAdminApp({
+    projectId: TEST_FIREBASE_PROJECT_ID
+  }).firestore();
 
+  before(async () => {
     // Create Alice's cart
     await admin.doc("carts/alicesCart").set({
       ownerUID: "alice",
@@ -163,8 +163,8 @@ describe("cart items creates, reads, updates, and deletes", () => {
     });
   });
 
-  after(() => {
-    firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
+  after(async () => {
+    await clearCartsAndCartItems(admin);
   });
 
   // Item creates
@@ -219,3 +219,23 @@ describe("cart items creates, reads, updates, and deletes", () => {
     );
   });
 });
+
+/**
+ * Clear all test data.
+ * @param {firebase.firestore.Firestore} db 
+ */
+async function clearCartsAndCartItems(db) {
+  // Note: normally we could call "firebase.clearFirestoreData()" from the testing library but
+  // we don't want to clear the whole database, we want to leave the "items" collection intact
+  const deleteBatch = db.batch();
+  const carts = await db.collection('carts').get();
+  for (const cart of carts.docs) {
+    deleteBatch.delete(cart.ref);
+    const cartItems = await cart.ref.collection('items').get();
+    for (const item of cartItems.docs) {
+      deleteBatch.delete(item.ref)
+    }
+  }
+
+  await deleteBatch.commit();
+}

@@ -4,8 +4,7 @@ service cloud.firestore {
     // User's cart metadata
     match /carts/{cartID} {
       allow create: if request.auth.uid == request.resource.data.ownerUID;
-      allow update, delete: if request.auth.uid == resource.data.ownerUID;
-      allow read: if request.auth.uid == resource.data.ownerUID;
+      allow read, update, delete: if request.auth.uid == resource.data.ownerUID;
     }
 
     // Items inside the user's cart
