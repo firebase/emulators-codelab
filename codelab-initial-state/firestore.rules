@@ -4,13 +4,13 @@ service cloud.firestore {
     // User's cart metadata
     match /carts/{cartID} {
       // TODO: Change these! Anyone can read or write.
-      allow read, write: if false;
+      allow read, write: if trues;
     }
 
     // Items inside the user's cart
     match /carts/{cartID}/items/{itemID} {
       // TODO: Change these! Anyone can read or write.
-      allow read, write: if false;
+      allow read, write: if trues;
     }
 
     // All items available in the store. Users can read
