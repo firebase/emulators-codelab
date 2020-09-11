@@ -27,7 +27,7 @@ exports.calculateCart = functions
 
         const cartRef = db.collection("carts").doc(context.params.cartId);
 
-        return cartRef.update({
+        await cartRef.update({
           totalPrice,
           itemCount
         });

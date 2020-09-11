@@ -38,7 +38,7 @@ exports.calculateCart = functions
         });
         console.log("Cart total successfully recalculated: ", totalPrice);
 
-        return await cartRef.update({
+        await cartRef.update({
           totalPrice,
           itemCount
         });

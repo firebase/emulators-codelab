@@ -169,23 +169,16 @@ describe("shopping cart items", async () => {
   });
 });
 
-describe.skip("adding an item to the cart recalculates the cart total. ", () => {
-  let unsubscribe;
-
+describe("adding an item to the cart recalculates the cart total. ", () => {
   const admin = firebase.initializeAdminApp({ 
     projectId: REAL_FIREBASE_PROJECT_ID 
   }).firestore();
 
   after(async () => {
     await clearCartsAndCartItems(admin);
-
-    // Call the function returned by `onSnapshot` to unsubscribe from updates
-    if (unsubscribe) {
-      unsubscribe();
-    }
   });
 
-  it("should sum the cost of their items", (done) => {
+  it("should sum the cost of their items", async () => {
     if (REAL_FIREBASE_PROJECT_ID == "changeme") {
       throw new Error("Please change the REAL_FIREBASE_PROJECT_ID at the top of the test file");
     }
@@ -196,27 +189,31 @@ describe.skip("adding an item to the cart recalculates the cart total. ", () => 
 
     // Setup: Initialize cart
     const aliceCartRef = db.doc("carts/alice")
-    aliceCartRef.set({ ownerUID: "alice", totalPrice: 0 });
+    await aliceCartRef.set({ ownerUID: "alice", totalPrice: 0 });
 
     //  Trigger `calculateCart` by adding items to the cart
     const aliceItemsRef = aliceCartRef.collection("items");
-    aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
-    aliceItemsRef.doc("doc2").set({ name: "grapefruit", price: 6.99 });
+    await aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
+    await aliceItemsRef.doc("doc2").set({ name: "grapefruit", price: 6.99 });
 
     // Listen for every update to the cart. Every time an item is added to
     // the cart's subcollection of items, the function updates `totalPrice`
     // and `itemCount` attributes on the cart.
     // Returns a function that can be called to unsubscribe the listener.
-    unsubscribe = aliceCartRef.onSnapshot(snap => {
-      // If the function worked, these will be cart's final attributes.
-      const expectedCount = 2;
-      const expectedTotal = 9.98;
-
-      // When the `itemCount`and `totalPrice` match the expectations for the
-      // two items added, the promise resolves, and the test passes.
-      if (snap.data().itemCount === expectedCount && snap.data().totalPrice == expectedTotal) {
-        done();
-      };
+    await new Promise((resolve) => {
+      const unsubscribe = aliceCartRef.onSnapshot(snap => {
+        // If the function worked, these will be cart's final attributes.
+        const expectedCount = 2;
+        const expectedTotal = 9.98;
+  
+        // When the `itemCount`and `totalPrice` match the expectations for the
+        // two items added, the promise resolves, and the test passes.
+        if (snap.data().itemCount === expectedCount && snap.data().totalPrice == expectedTotal) {
+          // Call the function returned by `onSnapshot` to unsubscribe from updates
+          unsubscribe();
+          resolve();
+        };
+      });
     });
   });
 });
