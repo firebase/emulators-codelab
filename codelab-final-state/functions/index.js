@@ -21,6 +21,12 @@ const db = admin.initializeApp().firestore();
 exports.calculateCart = functions
     .firestore.document("carts/{cartId}/items/{itemId}")
     .onWrite(async (change, context) => {
+      console.log(`onWrite: ${change.after.ref.path}`);
+      if (!change.after.exists) {
+        // Ignore deletes
+        return;
+      }
+
       let totalPrice = 0;
       let itemCount = 0;
       try {
@@ -31,21 +37,19 @@ exports.calculateCart = functions
           const itemData = item.data();
           if (itemData.price) {
             // If not specified, the quantity is 1
-            const quantity = (itemData.quantity) ? itemData.quantity : 1;
+            const quantity = itemData.quantity ? itemData.quantity : 1;
             itemCount += quantity;
             totalPrice += (itemData.price * quantity);
           }
         });
-        console.log("Cart total successfully recalculated: ", totalPrice);
 
         await cartRef.update({
           totalPrice,
           itemCount
         });
+
+        console.log("updated successfully!");
       } catch(err) {
-        if (itemCount === 0) {
-          return;
-        }
-        console.error("Cart could not be recalculated. ", err);
+        console.warn("update error", err);
       }
     });

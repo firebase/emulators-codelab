@@ -113,8 +113,8 @@ describe("shopping carts", () => {
 });
 
 describe("shopping cart items", async () => {
-  const admin = firebase.initializeAdminApp({
-    projectId: TEST_FIREBASE_PROJECT_ID
+  const admin = firebase.initializeAdminApp({ 
+    projectId: TEST_FIREBASE_PROJECT_ID 
   }).firestore();
 
   const aliceDb = firebase.initializeTestApp({
@@ -169,20 +169,13 @@ describe("shopping cart items", async () => {
   });
 });
 
-describe.skip("adding an item to the cart recalculates the cart total. ", () => {
-  let unsubscribe;
-
-  const admin = firebase.initializeAdminApp({
-    projectId: REAL_FIREBASE_PROJECT_ID
+describe("adding an item to the cart recalculates the cart total. ", () => {
+  const admin = firebase.initializeAdminApp({ 
+    projectId: REAL_FIREBASE_PROJECT_ID 
   }).firestore();
 
   after(async () => {
     await clearCartsAndCartItems(admin);
-
-    // Call the function returned by `onSnapshot` to unsubscribe from updates
-    if (unsubscribe) {
-      unsubscribe();
-    }
   });
 
   it("should sum the cost of their items", async () => {

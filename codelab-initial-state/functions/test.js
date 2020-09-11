@@ -169,7 +169,7 @@ describe("shopping cart items", async () => {
   });
 });
 
-describe("adding an item to the cart recalculates the cart total. ", () => {
+describe.skip("adding an item to the cart recalculates the cart total. ", () => {
   const admin = firebase.initializeAdminApp({ 
     projectId: REAL_FIREBASE_PROJECT_ID 
   }).firestore();
