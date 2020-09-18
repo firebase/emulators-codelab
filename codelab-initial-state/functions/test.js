@@ -208,7 +208,7 @@ describe.skip("adding an item to the cart recalculates the cart total. ", () => 
   
         // When the `itemCount`and `totalPrice` match the expectations for the
         // two items added, the promise resolves, and the test passes.
-        if (snap.data().itemCount === expectedCount && snap.data().totalPrice == expectedTotal) {
+        if (snap.exists && snap.data().itemCount === expectedCount && snap.data().totalPrice == expectedTotal) {
           // Call the function returned by `onSnapshot` to unsubscribe from updates
           unsubscribe();
           resolve();
