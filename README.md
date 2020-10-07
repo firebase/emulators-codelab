@@ -3,7 +3,7 @@
 This repository is meant to be used with the [Firestore and Functions Emulator
 Codelab]().
 
-There are two folders in this respository, `codelab-starting-state` and
+There are two folders in this repository, `codelab-starting-state` and
 `codelab-final-state`. To walk through the codelab, clone down the project,
 `git clone github.com/firebase/emulators-codelab`, `cd codelab-starting-state`,
 and then follow along with the [codelab steps](). To see the front end,
