@@ -14,7 +14,6 @@
 
 const { el, mount } = redom;
 
-import { createItems } from "./data.js";
 import {
   ItemCardList,
   HeaderIcon,
@@ -88,11 +87,8 @@ class HomePage {
 
   listenForItems() {
     this.db.collection("items").onSnapshot(items => {
-      // Note: for the purposes of this demo we create random items in the database if none exist.
-      // In a real app it would not make sense for the client to do this.
       if (items.size === 0) {
-        createItems(this.db);
-        return;
+        console.warn("No items in the database ... did you remember to start the emulators with --import?");
       }
 
       this.itemCardList.setItems(items);

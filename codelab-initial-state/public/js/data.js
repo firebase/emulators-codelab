@@ -69,19 +69,43 @@ const IMG_SIZES = ["640", "600", "480", "800", "640", "700", "720"];
 
 const IMG_CATEGORIES = ["arch", "tech", "nature"];
 
-export function getProductName() {
+/**
+ * This function can be used to create random items in the database,
+ * although it should not be necessary because the codelab includes
+ * a Firestore export for seed data.
+ */
+export async function createItems(db) {
+  console.log("createItems()");
+
+  const batch = db.batch();
+  for (let i = 0; i < 9; i++) {
+    const data = {
+      name: _getProductName(),
+      price: _getProductPrice(),
+      description: _getProductDescription(),
+      imageUrl: _getProductImageUrl()
+    };
+
+    const ref = db.collection("items").doc();
+    batch.set(ref, data);
+  }
+
+  await batch.commit();
+}
+
+function _getProductName() {
   return _randomElement(ADJECTIVES) + " " + _randomElement(NAMES);
 }
 
-export function getProductDescription() {
+function _getProductDescription() {
   return _randomElement(DESCRIPTIONS);
 }
 
-export function getProductPrice() {
+function _getProductPrice() {
   return _randomElement(PRICES);
 }
 
-export function getProductImageUrl() {
+function _getProductImageUrl() {
   return (
     "https://placeimg.com/" +
     _randomElement(IMG_SIZES) +
@@ -90,25 +114,6 @@ export function getProductImageUrl() {
     "/" +
     _randomElement(IMG_CATEGORIES)
   );
-}
-
-export async function createItems(db) {
-  console.log("createItems()");
-
-  const batch = db.batch();
-  for (let i = 0; i < 9; i++) {
-    const data = {
-      name: getProductName(),
-      price: getProductPrice(),
-      description: getProductDescription(),
-      imageUrl: getProductImageUrl()
-    };
-
-    const ref = db.collection("items").doc();
-    batch.set(ref, data);
-  }
-
-  await batch.commit();
 }
 
 function _randomElement(arr) {

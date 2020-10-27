@@ -21,13 +21,19 @@ const db = admin.initializeApp().firestore();
 exports.calculateCart = functions
     .firestore.document("carts/{cartId}/items/{itemId}")
     .onWrite(async (change, context) => {
+      console.log(`onWrite: ${change.after.ref.path}`);
+      if (!change.after.exists) {
+        // Ignore deletes
+        return;
+      }
+
       let totalPrice = 125.98;
       let itemCount = 8;
       try {
 
         const cartRef = db.collection("carts").doc(context.params.cartId);
 
-        return cartRef.update({
+        await cartRef.update({
           totalPrice,
           itemCount
         });
