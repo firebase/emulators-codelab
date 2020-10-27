@@ -179,7 +179,7 @@ describe("adding an item to the cart recalculates the cart total. ", () => {
   });
 
   it("should sum the cost of their items", async () => {
-    if (REAL_FIREBASE_PROJECT_ID == "changeme") {
+    if (REAL_FIREBASE_PROJECT_ID === "changeme") {
       throw new Error("Please change the REAL_FIREBASE_PROJECT_ID at the top of the test file");
     }
 
@@ -208,7 +208,7 @@ describe("adding an item to the cart recalculates the cart total. ", () => {
   
         // When the `itemCount`and `totalPrice` match the expectations for the
         // two items added, the promise resolves, and the test passes.
-        if (snap.exists && snap.data().itemCount === expectedCount && snap.data().totalPrice == expectedTotal) {
+        if (snap.exists && snap.data().itemCount === expectedCount && snap.data().totalPrice === expectedTotal) {
           // Call the function returned by `onSnapshot` to unsubscribe from updates
           unsubscribe();
           resolve();
