@@ -52,6 +52,7 @@ after(() => {
   firebase.apps().forEach(app => app.delete());
 });
 
+
 // Unit test the security rules
 describe("shopping carts", () => {
 
@@ -60,6 +61,7 @@ describe("shopping carts", () => {
     auth: aliceAuth
   }).firestore();
 
+<<<<<<< HEAD
   const bobDb = firebase.initializeTestApp({
     projectId: TEST_FIREBASE_PROJECT_ID,
     auth: bobAuth
@@ -71,6 +73,11 @@ describe("shopping carts", () => {
 
   after(async () => {
     await clearCartsAndCartItems(admin);
+=======
+  after(() => {
+    // Clear data from the emulator
+    return firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
+>>>>>>> github/master
   });
 
   it('can be created and updated by the cart owner', async () => {
@@ -80,6 +87,7 @@ describe("shopping carts", () => {
       total: 0
     }));
 
+<<<<<<< HEAD
     // Bob can't create Alice's cart
     await firebase.assertFails(bobDb.doc("carts/alicesCart").set({
       ownerUID: "alice",
@@ -112,6 +120,8 @@ describe("shopping carts", () => {
   });
 });
 
+=======
+>>>>>>> github/master
 describe("shopping cart items", async () => {
   const admin = firebase.initializeAdminApp({ 
     projectId: TEST_FIREBASE_PROJECT_ID 
@@ -142,8 +152,14 @@ describe("shopping cart items", async () => {
     }
   });
 
+<<<<<<< HEAD
   after(async () => {
     await clearCartsAndCartItems(admin);
+=======
+  after(() => {
+    // Clear data from the emulator
+    return firebase.clearFirestoreData({ projectId: TEST_FIREBASE_PROJECT_ID });
+>>>>>>> github/master
   });
 
   it("can be read only by the cart owner", async () => {
@@ -170,12 +186,24 @@ describe("shopping cart items", async () => {
 });
 
 describe.skip("adding an item to the cart recalculates the cart total. ", () => {
+<<<<<<< HEAD
   const admin = firebase.initializeAdminApp({ 
     projectId: REAL_FIREBASE_PROJECT_ID 
   }).firestore();
 
   after(async () => {
     await clearCartsAndCartItems(admin);
+=======
+  let unsubscribe;
+
+  after(() => {
+    // Call the function returned by `onSnapshot` to unsubscribe from updates
+    if (unsubscribe) {
+      unsubscribe();
+    }
+    // Clear data from the emulator
+    return firebase.clearFirestoreData({projectId: REAL_FIREBASE_PROJECT_ID});
+>>>>>>> github/master
   });
 
   it("should sum the cost of their items", async () => {
