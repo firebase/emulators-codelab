@@ -21,6 +21,6 @@ Please read and follow the steps in the [CONTRIBUTING.md](CONTRIBUTING.md)
 ## License
 See [LICENSE](LICENSE)
 
-[codelab]: https://firebase.google.com/learn/codelabs/firebase-emulator
+[codelab]: https://firebase.google.com/codelabs/firebase-emulator
 [pathway]: https://firebase.google.com/learn/pathways/firebase-emulators
 [video]: https://www.youtube.com/watch?v=yAFQVjxNWE8
