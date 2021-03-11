@@ -17,4 +17,4 @@ jobs:
         working-directory: codelab-final-state/functions
         run: firebase emulators:exec --project example 'npm test'
         env:
-          - GCLOUD_PROJECT=example
+          GCLOUD_PROJECT: example
