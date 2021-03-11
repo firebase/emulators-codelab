@@ -17,7 +17,7 @@ const path = require("path");
 const TEST_FIREBASE_PROJECT_ID = "test-firestore-rules-project";
 
 // TODO: Change this to your real Firebase Project ID
-const REAL_FIREBASE_PROJECT_ID = "example";
+const REAL_FIREBASE_PROJECT_ID = "changeme";
 
 const firebase = require("@firebase/rules-unit-testing");
 
@@ -38,6 +38,15 @@ const bobAuth = {
 };
 
 before(async () => {
+  // Discover which emulators are running and where by using the Emulator Hub
+  // This assumes the hub is running at localhost:4400 (the default), you can check
+  // by looking for the "Emulator Hub running at localhost:<port>" line in the
+  // logs from firebase emulators:start
+  const emulatorSettings = await firebase.discoverEmulators();
+  firebase.useEmulators(emulatorSettings);
+
+  console.log("Using emulators", emulatorSettings);
+
   // Load the content of the "firestore.rules" file into the emulator before running the
   // test suite. This is necessary because we are using a fake Project ID in the tests,
   // so the rules "hot reloading" behavior which works in the Web App does not apply here.
@@ -70,7 +79,7 @@ describe("shopping carts", () => {
   }).firestore();
 
   after(async () => {
-    await clearCartsAndCartItems(admin);
+    await resetData(admin, TEST_FIREBASE_PROJECT_ID);
   });
 
   it('can be created and updated by the cart owner', async () => {
@@ -143,7 +152,7 @@ describe("shopping cart items", async () => {
   });
 
   after(async () => {
-    await clearCartsAndCartItems(admin);
+    await resetData(admin, TEST_FIREBASE_PROJECT_ID);
   });
 
   it("can be read only by the cart owner", async () => {
@@ -175,7 +184,7 @@ describe("adding an item to the cart recalculates the cart total. ", () => {
   }).firestore();
 
   after(async () => {
-    await clearCartsAndCartItems(admin);
+    await resetData(admin, REAL_FIREBASE_PROJECT_ID);
   });
 
   it("should sum the cost of their items", async () => {
@@ -219,21 +228,25 @@ describe("adding an item to the cart recalculates the cart total. ", () => {
 });
 
 /**
- * Clear all test data.
+ * Clear the data in the Firestore emulator without triggering any of our
+ * local Cloud Functions.
+ * 
  * @param {firebase.firestore.Firestore} db 
+ * @param {string} projectId
  */
-async function clearCartsAndCartItems(db) {
-  // Note: normally we could call "firebase.clearFirestoreData()" from the testing library but
-  // we don't want to clear the whole database, we want to leave the "items" collection intact
-  const deleteBatch = db.batch();
-  const carts = await db.collection('carts').get();
-  for (const cart of carts.docs) {
-    deleteBatch.delete(cart.ref);
-    const cartItems = await cart.ref.collection('items').get();
-    for (const item of cartItems.docs) {
-      deleteBatch.delete(item.ref)
-    }
-  }
+async function resetData(db, projectId) {
+  await firebase.withFunctionTriggersDisabled(async () => {
+    // Get the items collection before we delete everything
+    const items = await db.collection('items').get();
 
-  await deleteBatch.commit();
+    // Clear all data
+    await firebase.clearFirestoreData({
+      projectId
+    });
+
+    // Restore the items collection
+    for (const doc of items.docs) {
+      await doc.ref.set(doc.data());
+    }
+  });
 }

@@ -25,16 +25,15 @@ import {
 export async function onDocumentReady(firebaseApp) {
   console.log("Firebase Config", JSON.stringify(firebaseApp.options));
 
+  const auth = firebaseApp.auth();
   const db = firebaseApp.firestore();
+
   if (location.hostname === "localhost") {
     console.log("localhost detected!");
-    db.settings({
-      host: "localhost:8080",
-      ssl: false
-    });
+    auth.useEmulator("http://localhost:9099");
+    db.useEmulator("localhost", 8080);
   }
 
-  const auth = firebaseApp.auth();
   const homePage = new HomePage(db, auth);
   mount(document.body, homePage);
 }
