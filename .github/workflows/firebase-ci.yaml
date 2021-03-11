@@ -16,3 +16,5 @@ jobs:
       - name: Run all the tests
         working-directory: codelab-final-state/functions
         run: firebase emulators:exec --project example 'npm test'
+        env:
+          - GITHUB_PROJECT=example
