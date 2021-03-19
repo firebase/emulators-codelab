@@ -1,7 +1,7 @@
 ---
 id: firebase-emulator
 summary: Learn how to develop a web app with the Firebase Emulator Suite.
-status: [hidden,draft]
+status: [published]
 authors: Sam Stern, Rachel Myers
 categories: Web
 tags: web
@@ -10,33 +10,24 @@ tags: web
 
 # Local Development with the Firebase Emulator Suite
 
-
-
-
 ## Before you begin
 
-
-
 Serverless backend tools like Cloud Firestore and Cloud Functions are very easy to use, but can be hard to test.  The Firebase Local Emulator Suite allows you to run local versions of these services on your development machine so you can develop your app quickly and safely.
-
-### **Walkthrough**
-If you want to walk through this codelab with the authors watch this video:
-
-<video id="yAFQVjxNWE8"></video>
 
 ### **Prerequisites**
 
 * A simple editor such as Visual Studio Code, Atom, or Sublime Text
-* Node.js 8.6.0 or higher (to install Node.js,  [use nvm](https://github.com/nvm-sh/nvm#installation-and-update), to check your version, run `node --version`)
+* Node.js 10.0.0 or higher (to install Node.js,  [use nvm](https://github.com/nvm-sh/nvm#installation-and-update), to check your version, run `node --version`)
 * Java 7 or higher (to install Java  [use these instructions](https://java.com/en/download/help/download_options.xml), to check your version, run `java -version`)
 
 ### **What you'll do**
 
 In this codelab, you will run and debug a simple online shopping app which is powered by multiple Firebase services:
 
-* **Cloud Firestore:** A globally scalable, serverless, NoSQL database with real-time capabilities. 
-* **Firebase Hosting**: A fast and secure hosting for web apps. 
-* **Cloud Functions**: A serverless backend code that runs in response to events or HTTP requests.  
+* **Cloud Firestore:** a globally scalable, serverless, NoSQL database with real-time capabilities. 
+* **Cloud Functions**: a serverless backend code that runs in response to events or HTTP requests.  
+* **Firebase Authentication**: a managed authentication service that integrates with other Firebase products.
+* **Firebase Hosting**: fast and secure hosting for web apps. 
 
 You will connect the app to the Emulator Suite to enable local development.
 
@@ -51,21 +42,6 @@ You'll also learn how to:
 
 ## Set up
 Duration: 04:00
-
-
-### Create a Firebase project
-
-If you don't have a Firebase project, in the  [Firebase console](https://console.firebase.google.com/), create a new Firebase project.  Make a note of the Project ID you choose, you will need it later.
-
-### **Configure your project**
-
-In the Firebase console, navigate to the **Authentication** pane and then to the **Sign-in method** tab. Make sure the **Anonymous** provider is enabled.
-
-<img src="img/49f043ed7b963b50.png" alt="49f043ed7b963b50.png"  width="529.00" />
-
-> aside negative
-> 
-> **Note**: For demonstration purposes, this application exclusively uses Anonymous Authentication. Anonymous Auth assigns each session-user an ID that uniquely identifies them to the backend. It enables you to create an onboarding experience that doesn't require users to create a permanent account immediately. In production applications, to save user data across sessions and devices, you'll need to convert users from Anonymous Auth to another sign in method.
 
 ### **Get the source code**
 
@@ -84,8 +60,7 @@ $ cd emulators-codelab/codelab-initial-state
 Now, install the dependencies so you can run the code. If you're on a slower internet connection this may take a minute or two:
 
 ```console
-# Move into the functions directory, install dependencies, jump out.
-$ cd functions && npm install && cd -
+$ cd functions && npm install && cd - 
 ```
 
 ### **Get the Firebase CLI**
@@ -96,45 +71,34 @@ The Emulator Suite is part of the Firebase CLI (command-line interface) which ca
 $ npm install -g firebase-tools
 ```
 
-Next, confirm that you have the latest version of the CLI.  This codelab should work with version 8.4.0 or higher but later versions include more bug fixes.
+Next, confirm that you have the latest version of the CLI.  This codelab should work with version 9.0.0 or higher but later versions include more bug fixes.
 
 ```console
 $ firebase --version
-8.7.0
+9.6.0
 ```
 
-### Connect to your Project
+### Connect to your Firebase project
 
-Now we need to connect this code to your Firebase project.
+If you don't have a Firebase project, in the  [Firebase console](https://console.firebase.google.com/), create a new Firebase project.  Make a note of the Project ID you choose, you will need it later.
 
+Now we need to connect this code to your Firebase project. 
 First run the following command to log in to the Firebase CLI:
 
 ```console
 $ firebase login
 ```
 
-Next run the following command to create a project alias.  First, select your project from the list. When asked what alias you want to use, choose **default**.
+Next run the following command to create a project alias. Replace `$YOUR_PROJECT_ID` with the ID of your Firebase project.
 
 ```console
-$ firebase use --add
-```
-
-The output should look like the following example. Remember to choose your actual Firebase project from the list:
-
-```console
-? Which project do you want to add? YOUR_PROJECT_ID
-? What alias do you want to use for this project? (e.g. staging) default
-
-Created alias default for YOUR_PROJECT_ID.
-Now using alias default (YOUR_PROJECT_ID)
+$ firebase use $YOUR_PROJECT_ID
 ```
 
 Now you're ready to run the app!
 
-
 ## Run the emulators
 Duration: 03:00
-
 
 In this section, you'll run the app locally.  This means it is time to boot up the Emulator Suite.
 
@@ -150,32 +114,34 @@ You should see some output like this:
 
 ```console
 $ firebase emulators:start --import=./seed
-i  emulators: Starting emulators: functions, firestore, hosting
-i  firestore: downloading cloud-firestore-emulator-v1.11.5.jar...
-Progress: =======================================================> (100% of 64MB
+i  emulators: Starting emulators: auth, functions, firestore, hosting
+⚠  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: database, pubsub
+i  firestore: Importing data from /Users/samstern/Projects/emulators-codelab/codelab-initial-state/seed/firestore_export/firestore_export.overall_export_metadata
 i  firestore: Firestore Emulator logging to firestore-debug.log
 i  hosting: Serving hosting files from: public
 ✔  hosting: Local server: http://localhost:5000
-i  ui: downloading ui-v1.1.1.zip...
-Progress: ========================================================> (100% of 4MB
 i  ui: Emulator UI logging to ui-debug.log
-i  functions: Watching "/usr/local/google/home/samstern/Scratch/emulator-codelabs/emulator-codelab/codelab-final-state/functions" for Cloud Functions...
+i  functions: Watching "/Users/samstern/Projects/emulators-codelab/codelab-initial-state/functions" for Cloud Functions...
 ✔  functions[calculateCart]: firestore function initialized.
 
-┌───────────────────────────────────────────────────────────────────────┐
-│ ✔  All emulators ready! View status and logs at http://localhost:4000 │
-└───────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://localhost:4000                │
+└─────────────────────────────────────────────────────────────┘
 
-┌───────────┬────────────────┬─────────────────────────────────┐
-│ Emulator  │ Host:Port      │ View in Emulator UI             │
-├───────────┼────────────────┼─────────────────────────────────┤
-│ Functions │ localhost:5001 │ http://localhost:4000/functions │
-├───────────┼────────────────┼─────────────────────────────────┤
-│ Firestore │ localhost:8080 │ http://localhost:4000/firestore │
-├───────────┼────────────────┼─────────────────────────────────┤
-│ Hosting   │ localhost:5000 │ n/a                             │
-└───────────┴────────────────┴─────────────────────────────────┘
-  Other reserved ports: 4400, 4500
+┌────────────────┬────────────────┬─────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI             │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Authentication │ localhost:9099 │ http://localhost:4000/auth      │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Functions      │ localhost:5001 │ http://localhost:4000/functions │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Firestore      │ localhost:8080 │ http://localhost:4000/firestore │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Hosting        │ localhost:5000 │ n/a                             │
+└────────────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub running at localhost:4400
+  Other reserved ports: 4500
 
 Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
 ```
@@ -191,36 +157,46 @@ Once you see the **All emulators started** message, the app is ready to use.
 > * The Functions emulator noticed the `calculateCart` function and notified the Firestore emulator.
 > * The Functions emulator is now watching the `functions` directory for code changes.
 
-#### **Connect the web app to the Cloud Firestore Emulator**
+#### **Connect the web app to the emulators**
 
-We can see that the Cloud Firestore emulator is serving web traffic on the port `8080` according to this line from the logs:
+Based on the table in the logs we can see that the the Cloud Firestore emulator is listening on port `8080` and the Authentication emulator is listening on port `9099`.
 
 ```console
-│ Firestore │ localhost:8080 │ http://localhost:4000/firestore
+┌────────────────┬────────────────┬─────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI             │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Authentication │ localhost:9099 │ http://localhost:4000/auth      │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Functions      │ localhost:5001 │ http://localhost:4000/functions │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Firestore      │ localhost:8080 │ http://localhost:4000/firestore │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Hosting        │ localhost:5000 │ n/a                             │
+└────────────────┴────────────────┴─────────────────────────────────┘
 ```
 
-Let's connect your frontend code to the emulator, rather than to production.  Open the `public/js/homepage.js` file and find the `onDocumentReady` function.  You can see that the function accesses the standard Firestore instance:
+Let's connect your frontend code to the emulator, rather than to production. Open the `public/js/homepage.js` file and find the `onDocumentReady` function. We can see that the code accesses the standard Firestore and Auth instances:
 
 **public/js/homepage.js**
 
 ```
+  const auth = firebaseApp.auth();
   const db = firebaseApp.firestore();
 ```
 
-Let's update the `db` object to point to the Firestore emulator:
+Let's update the `db` and `auth` objects to point to the local emulators:
 
 **public/js/homepage.js**
 
-```
+```  
+  const auth = firebaseApp.auth();
   const db = firebaseApp.firestore();
 
   // ADD THESE LINES
-  if (window.location.hostname === "localhost") {
+  if (location.hostname === "localhost") {
     console.log("localhost detected!");
-    db.settings({
-      host: "localhost:8080",
-      ssl: false
-    });
+    auth.useEmulator("http://localhost:9099");
+    db.useEmulator("localhost", 8080);
   }
 ```
 
@@ -230,11 +206,11 @@ Now when the app is running on localhost (served by the Hosting emulator) the Fi
 
 In your web browser, navigate to  [http://localhost:4000/](http://localhost:4000/). You should see the Emulator Suite UI.
 
-<img src="img/34ddd523dabd068a.png" alt="34ddd523dabd068a.png"  width="624.00" />
+<img src="img/emulator-ui-home.png" alt="Emulators UI home screen" />
 
 Click to see the UI for the Firestore Emulator. The `items` collection already contains data because of the data imported with the `--import` flag.
 
-<img src="img/4ef88d0148405d36.png" alt="4ef88d0148405d36.png"  width="623.50" />
+<img src="img/4ef88d0148405d36.png" alt="4ef88d0148405d36.png" />
 
 
 ## Run the app
@@ -308,7 +284,7 @@ But if you click **Sign In** in the upper toolbar and then click **Add to Cart**
 
 > aside negative
 > 
-> **Note**: if you're having trouble signing in, make sure you have enabled Anonymous Authentication in the Firebase console.
+> **Note**: For demonstration purposes, this application exclusively uses [**Anonymous Authentication**](https://firebase.google.com/docs/auth/web/anonymous-auth). Anonymous Auth assigns each session-user an ID that uniquely identifies them to the backend. It enables you to create an onboarding experience that doesn't require users to create a permanent account immediately. In production applications, to save user data across sessions and devices, you'll need to convert users from Anonymous Auth to another sign in method.
 
 However, it doesn't look like the numbers are correct at all:
 
@@ -761,8 +737,6 @@ $ npm test
 
 Nice! Now all of our tests pass. We have one pending test, but we'll get to that in a few steps.
 
-These tests are the bare minimum for the rules we wrote. You can find more complete tests in `functions/test_all.js`
-
 
 ## Check the "add to cart" flow again
 Duration: 02:00
@@ -1189,13 +1163,7 @@ Confirm that the cart updates with the correct total. Fantastic!
 
 You've walked through a complex test case between Cloud Functions for Firebase and Cloud Firestore. You wrote a Cloud Function to make the test pass. You also confirmed the new functionality is working in the UI! You did all this locally, running the emulators on your own machine.
 
-You've also created a web client that's running against the local emulators, tailored security rules to protect the data, and tested the security rules using the local emulators. 
-
-This app is ready to deploy! If you'd like to ship this project to production, deploy away!
-
-```console
-$ firebase deploy
-```
+You've also created a web client that's running against the local emulators, tailored security rules to protect the data, and tested the security rules using the local emulators.
 
 <img src="img/c6a7aeb91fe97a64.gif" alt="c6a7aeb91fe97a64.gif"  width="624.00" />
 

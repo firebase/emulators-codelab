@@ -25,9 +25,9 @@ import {
 export async function onDocumentReady(firebaseApp) {
   console.log("Firebase Config", JSON.stringify(firebaseApp.options));
 
-  const db = firebaseApp.firestore();
-  
   const auth = firebaseApp.auth();
+  const db = firebaseApp.firestore();
+
   const homePage = new HomePage(db, auth);
   mount(document.body, homePage);
 }
