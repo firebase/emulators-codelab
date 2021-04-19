@@ -59,7 +59,7 @@ $ cd emulators-codelab/codelab-initial-state
 
 Now, install the dependencies so you can run the code. If you're on a slower internet connection this may take a minute or two:
 
-```console
+```shell
 # Move into the functions directory
 $ cd functions
 
