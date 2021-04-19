@@ -59,8 +59,15 @@ $ cd emulators-codelab/codelab-initial-state
 
 Now, install the dependencies so you can run the code. If you're on a slower internet connection this may take a minute or two:
 
-```console
-$ cd functions && npm install && cd - 
+```shell
+# Move into the functions directory
+$ cd functions
+
+# Install dependencies
+$ npm install
+
+# Move back into the previous directory
+$ cd ../
 ```
 
 ### **Get the Firebase CLI**
@@ -622,7 +629,7 @@ $ npm test
 
   2 passing (482ms)
   1 pending
-  3 failing
+  2 failing
 ```
 
 Good job! You have now secured access to shopping carts.  Let's move on to the next failing test.
@@ -1048,6 +1055,7 @@ exports.calculateCart = functions
       }
 
       try {
+        // CHANGE THESE LINES
         let totalPrice = 0;
         let itemCount = 0;
 
@@ -1110,8 +1118,10 @@ exports.calculateCart = functions
           itemCount
         });
 
+        // OPTIONAL LOGGING HERE
         console.log("Cart total successfully recalculated: ", totalPrice);
       } catch(err) {
+        // OPTIONAL LOGGING HERE
         console.warn("update error", err);
       }
     });
