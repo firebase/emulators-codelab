@@ -39,8 +39,8 @@ const bobAuth = {
 
 before(async () => {
   // Discover which emulators are running and where by using the Emulator Hub
-  // This assumes the hub is running at localhost:4400 (the default), you can check
-  // by looking for the "Emulator Hub running at localhost:<port>" line in the
+  // This assumes the hub is running at 127.0.0.1:4400 (the default), you can check
+  // by looking for the "Emulator Hub running at 127.0.0.1:<port>" line in the
   // logs from firebase emulators:start
   const emulatorSettings = await firebase.discoverEmulators();
   firebase.useEmulators(emulatorSettings);

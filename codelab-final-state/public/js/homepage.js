@@ -28,10 +28,10 @@ export async function onDocumentReady(firebaseApp) {
   const auth = firebaseApp.auth();
   const db = firebaseApp.firestore();
 
-  if (location.hostname === "localhost") {
-    console.log("localhost detected!");
-    auth.useEmulator("http://localhost:9099");
-    db.useEmulator("localhost", 8080);
+  if (location.hostname === "127.0.0.1") {
+    console.log("127.0.0.1 detected!");
+    auth.useEmulator("http://127.0.0.1:9099");
+    db.useEmulator("127.0.0.1", 8080);
   }
 
   const homePage = new HomePage(db, auth);
