@@ -31,7 +31,7 @@ $ npm run devserver
 > scripts@1.0.0 devserver /.../emulators-codelab/scripts
 > node devserver.js
 
-Serving content from /.../emulators-codelab/steps/firebase-emulator at http://localhost:3000
+Serving content from /.../emulators-codelab/steps/firebase-emulator at http://127.0.0.1:3000
 Detected file change (/.../emulators-codelab/steps/index.lab.md), recompiling...
 ```
 

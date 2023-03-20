@@ -132,28 +132,28 @@ i  emulators: Starting emulators: auth, functions, firestore, hosting
 i  firestore: Importing data from /Users/samstern/Projects/emulators-codelab/codelab-initial-state/seed/firestore_export/firestore_export.overall_export_metadata
 i  firestore: Firestore Emulator logging to firestore-debug.log
 i  hosting: Serving hosting files from: public
-✔  hosting: Local server: http://localhost:5000
+✔  hosting: Local server: http://127.0.0.1:5000
 i  ui: Emulator UI logging to ui-debug.log
 i  functions: Watching "/Users/samstern/Projects/emulators-codelab/codelab-initial-state/functions" for Cloud Functions...
 ✔  functions[calculateCart]: firestore function initialized.
 
 ┌─────────────────────────────────────────────────────────────┐
 │ ✔  All emulators ready! It is now safe to connect your app. │
-│ i  View Emulator UI at http://localhost:4000                │
+│ i  View Emulator UI at http://127.0.0.1:4000                │
 └─────────────────────────────────────────────────────────────┘
 
 ┌────────────────┬────────────────┬─────────────────────────────────┐
 │ Emulator       │ Host:Port      │ View in Emulator UI             │
 ├────────────────┼────────────────┼─────────────────────────────────┤
-│ Authentication │ localhost:9099 │ http://localhost:4000/auth      │
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth      │
 ├────────────────┼────────────────┼─────────────────────────────────┤
-│ Functions      │ localhost:5001 │ http://localhost:4000/functions │
+│ Functions      │ 127.0.0.1:5001 │ http://127.0.0.1:4000/functions │
 ├────────────────┼────────────────┼─────────────────────────────────┤
-│ Firestore      │ localhost:8080 │ http://localhost:4000/firestore │
+│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore │
 ├────────────────┼────────────────┼─────────────────────────────────┤
-│ Hosting        │ localhost:5000 │ n/a                             │
+│ Hosting        │ 127.0.0.1:5000 │ n/a                             │
 └────────────────┴────────────────┴─────────────────────────────────┘
-  Emulator Hub running at localhost:4400
+  Emulator Hub running at 127.0.0.1:4400
   Other reserved ports: 4500
 
 Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
@@ -165,7 +165,7 @@ Once you see the **All emulators started** message, the app is ready to use.
 > 
 > **Aside: What just happened?**
 > 
-> * Each emulator started up on localhost, each one is running on a different port.
+> * Each emulator started up on 127.0.0.1, each one is running on a different port.
 > * The Firestore emulator imported data from the `seed` directory, which is provided to make this codelab simpler.
 > * The Functions emulator noticed the `calculateCart` function and notified the Firestore emulator.
 > * The Functions emulator is now watching the `functions` directory for code changes.
@@ -178,13 +178,13 @@ Based on the table in the logs we can see that the the Cloud Firestore emulator 
 ┌────────────────┬────────────────┬─────────────────────────────────┐
 │ Emulator       │ Host:Port      │ View in Emulator UI             │
 ├────────────────┼────────────────┼─────────────────────────────────┤
-│ Authentication │ localhost:9099 │ http://localhost:4000/auth      │
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth      │
 ├────────────────┼────────────────┼─────────────────────────────────┤
-│ Functions      │ localhost:5001 │ http://localhost:4000/functions │
+│ Functions      │ 127.0.0.1:5001 │ http://127.0.0.1:4000/functions │
 ├────────────────┼────────────────┼─────────────────────────────────┤
-│ Firestore      │ localhost:8080 │ http://localhost:4000/firestore │
+│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore │
 ├────────────────┼────────────────┼─────────────────────────────────┤
-│ Hosting        │ localhost:5000 │ n/a                             │
+│ Hosting        │ 127.0.0.1:5000 │ n/a                             │
 └────────────────┴────────────────┴─────────────────────────────────┘
 ```
 
@@ -206,18 +206,18 @@ Let's update the `db` and `auth` objects to point to the local emulators:
   const db = firebaseApp.firestore();
 
   // ADD THESE LINES
-  if (location.hostname === "localhost") {
-    console.log("localhost detected!");
-    auth.useEmulator("http://localhost:9099");
-    db.useEmulator("localhost", 8080);
+  if (location.hostname === "127.0.0.1") {
+    console.log("127.0.0.1 detected!");
+    auth.useEmulator("http://127.0.0.1:9099");
+    db.useEmulator("127.0.0.1", 8080);
   }
 ```
 
-Now when the app is running on localhost (served by the Hosting emulator) the Firestore client also points at the local emulator rather than at a production database.
+Now when the app is running on your local machine (served by the Hosting emulator) the Firestore client also points at the local emulator rather than at a production database.
 
 #### **Open the EmulatorUI**
 
-In your web browser, navigate to  [http://localhost:4000/](http://localhost:4000/). You should see the Emulator Suite UI.
+In your web browser, navigate to  [http://127.0.0.1:4000/](http://127.0.0.1:4000/). You should see the Emulator Suite UI.
 
 <img src="img/emulator-ui-home.png" alt="Emulators UI home screen" />
 
@@ -232,7 +232,7 @@ Duration: 02:00
 
 #### **Open the app**
 
-In your web browser, navigate to  [http://localhost:5000](http://localhost:5000) and you should see The Fire Store running locally on your machine!
+In your web browser, navigate to  [http://127.0.0.1:5000](http://127.0.0.1:5000) and you should see The Fire Store running locally on your machine!
 
 <img src="img/939f87946bac2ee4.png" alt="939f87946bac2ee4.png"  width="624.00" />
 
@@ -657,7 +657,7 @@ Right now, although cart owners read and write to their cart, they can't read or
 
 This is a broken state for users. 
 
-Return to the web UI, which is running on `http://localhost:5000,` and try to add something to your cart. You get a `Permission Denied` error, visible from the debug console, because we haven't yet granted users access to created documents in the *`items`* subcollection.
+Return to the web UI, which is running on `http://127.0.0.1:5000,` and try to add something to your cart. You get a `Permission Denied` error, visible from the debug console, because we haven't yet granted users access to created documents in the *`items`* subcollection.
 
 
 ## Allow cart items access
@@ -755,7 +755,7 @@ Nice! Now all of our tests pass. We have one pending test, but we'll get to that
 Duration: 02:00
 
 
-Return to the web front end ( [http://localhost:5000](http://localhost:5000)) and add an item to the cart. This is an important step to confirm that our tests and rules match the functionality required by the client. (Remember that the last time we tried out the UI users were unable to add items to their cart!)
+Return to the web front end ( [http://127.0.0.1:5000](http://127.0.0.1:5000)) and add an item to the cart. This is an important step to confirm that our tests and rules match the functionality required by the client. (Remember that the last time we tried out the UI users were unable to add items to their cart!)
 
 <img src="img/69ad26cee520bf24.png" alt="69ad26cee520bf24.png"  width="624.00" />
 
@@ -1169,7 +1169,7 @@ Good job!
 Duration: 03:00
 
 
-For the final test, return to the web app ( [http://localhost:5000/](http://localhost:5000/)) and add an item to the cart. 
+For the final test, return to the web app ( [http://127.0.0.1:5000/](http://127.0.0.1:5000/)) and add an item to the cart. 
 
 <img src="img/69ad26cee520bf24.png" alt="69ad26cee520bf24.png"  width="624.00" />
 

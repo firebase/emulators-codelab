@@ -14,7 +14,7 @@ function main() {
   const app = express();
   app.use(express.static(DST_PATH));
 
-  console.log(`Serving content from ${DST_PATH} at http://localhost:${PORT}`);
+  console.log(`Serving content from ${DST_PATH} at http://127.0.0.1:${PORT}`);
 
   chokidar.watch(LAB_PATH).on("all", (event, path) => {
     console.log(`Detected file change (${path}), recompiling...`);
