@@ -86,7 +86,7 @@ class HomePage {
   }
 
   listenForItems() {
-    this.db.collection("items").onSnapshot(items => {
+    this.db.collection("item s").onSnapshot(items => {
       if (items.size === 0) {
         console.warn("No items in the database ... did you remember to start the emulators with --import?");
       }
@@ -125,7 +125,7 @@ class HomePage {
     });
 
     // Listen for updates to cart items
-    this.cartItemsUnsub = cartRef.collection("items").onSnapshot(items => {
+    this.cartItemsUnsub = cartRef.collection("item s").onSnapshot(items => {
       this.setCartItems(items);
     });
   }
@@ -174,7 +174,7 @@ class HomePage {
     return this.db
       .collection("carts")
       .doc(this.auth.currentUser.uid)
-      .collection("items")
+      .collection("item s")
       .doc(id)
       .set(itemData);
   }

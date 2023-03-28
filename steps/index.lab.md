@@ -265,7 +265,7 @@ It seems like there was some error in the `addToCart` method, let's take a look 
     return this.db
       .collection("carts")
       .doc(this.auth.currentUser.uid)
-      .collection("items")
+      .collection("item s")
       .doc(id)
       .set(itemData);
   }
@@ -338,7 +338,7 @@ A new document is added to the Firestore collection `/carts/{cartId}/items/{item
     return this.db
       .collection("carts")
       .doc(this.auth.currentUser.uid)
-      .collection("items")
+      .collection("item s")
       .doc(id)
       .set(itemData);
   }
@@ -863,7 +863,7 @@ it("should sum the cost of their items", async () => {
     await aliceCartRef.set({ ownerUID: "alice", totalPrice: 0 });
 
     //  Trigger calculateCart by adding items to the cart
-    const aliceItemsRef = aliceCartRef.collection("items");
+    const aliceItemsRef = aliceCartRef.collection("item s");
     await aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
     await aliceItemsRef.doc("doc2").set({ name: "grapefruit", price: 6.99 });
 
@@ -896,7 +896,7 @@ it("should sum the cost of their items", (done) => {
     aliceCartRef.set({ ownerUID: "alice", totalPrice: 0 });
 
     //  Trigger calculateCart by adding items to the cart
-    const aliceItemsRef = aliceCartRef.collection("items");
+    const aliceItemsRef = aliceCartRef.collection("item s");
     aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
     aliceItemsRef.doc("doc2").set({ name: "grapefruit", price: 6.99 });
     
@@ -1026,7 +1026,7 @@ exports.calculateCart = functions
 
         const cartRef = db.collection("carts").doc(context.params.cartId);
         // ADD LINES FROM HERE
-        const itemsSnap = await cartRef.collection("items").get();
+        const itemsSnap = await cartRef.collection("item s").get();
 
         itemsSnap.docs.forEach(item => {
           const itemData = item.data();
@@ -1066,7 +1066,7 @@ exports.calculateCart = functions
         let itemCount = 0;
 
         const cartRef = db.collection("carts").doc(context.params.cartId);
-        const itemsSnap = await cartRef.collection("items").get();
+        const itemsSnap = await cartRef.collection("item s").get();
 
         itemsSnap.docs.forEach(item => {
           const itemData = item.data();
@@ -1107,7 +1107,7 @@ exports.calculateCart = functions
       let itemCount = 0;
       try {
         const cartRef = db.collection("carts").doc(context.params.cartId);
-        const itemsSnap = await cartRef.collection("items").get();
+        const itemsSnap = await cartRef.collection("item s").get();
 
         itemsSnap.docs.forEach(item => {
           const itemData = item.data();

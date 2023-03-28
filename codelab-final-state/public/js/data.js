@@ -86,7 +86,7 @@ export async function createItems(db) {
       imageUrl: _getProductImageUrl()
     };
 
-    const ref = db.collection("items").doc();
+    const ref = db.collection("item s").doc();
     batch.set(ref, data);
   }
 
