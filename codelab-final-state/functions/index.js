@@ -31,7 +31,7 @@ exports.calculateCart = functions
       let itemCount = 0;
       try {
         const cartRef = db.collection("carts").doc(context.params.cartId);
-        const itemsSnap = await cartRef.collection("items").get();
+        const itemsSnap = await cartRef.collection("item s").get();
 
         itemsSnap.docs.forEach(item => {
           const itemData = item.data();

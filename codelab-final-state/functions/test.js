@@ -145,7 +145,7 @@ describe("shopping cart items", async () => {
     });
 
     // Create items subcollection in Alice's Cart
-    const alicesItemsRef = aliceCartRef.collection("items");
+    const alicesItemsRef = aliceCartRef.collection("item s");
     for (const name of Object.keys(seedItems)) {
       await alicesItemsRef.doc(name).set({ value: seedItems[name] });
     }
@@ -201,7 +201,7 @@ describe("adding an item to the cart recalculates the cart total. ", () => {
     await aliceCartRef.set({ ownerUID: "alice", totalPrice: 0 });
 
     //  Trigger `calculateCart` by adding items to the cart
-    const aliceItemsRef = aliceCartRef.collection("items");
+    const aliceItemsRef = aliceCartRef.collection("item s");
     await aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
     await aliceItemsRef.doc("doc2").set({ name: "grapefruit", price: 6.99 });
 
