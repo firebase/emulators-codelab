@@ -10,7 +10,7 @@ Install the `claat` tool from this repo:
 https://github.com/googlecodelabs/tools
 
 ```
-go get github.com/googlecodelabs/tools/claat
+go install github.com/googlecodelabs/tools/claat@latest
 ```
 
 ### node
