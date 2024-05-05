@@ -107,7 +107,7 @@ function _getProductPrice() {
 
 function _getProductImageUrl() {
   return (
-    "https://placeimg.com/" +
+    "https://via.placeholder.com/" +
     _randomElement(IMG_SIZES) +
     "/" +
     _randomElement(IMG_SIZES) +

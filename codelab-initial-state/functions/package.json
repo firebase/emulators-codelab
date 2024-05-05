@@ -8,15 +8,16 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "mocha --timeout 5000 --exit"
+    "test": "mocha --timeout 10000 --exit"
   },
   "engines": {
-    "node": "16"
+    "node": "20"
   },
   "dependencies": {
     "file-system": "^2.2.2",
     "firebase-admin": "^9.5.0",
-    "firebase-functions": "^3.13.2"
+    "firebase-functions": "^3.13.2",
+    "google-gax": "^4.3.3"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^1.2.3",

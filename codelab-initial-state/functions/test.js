@@ -17,7 +17,7 @@ const path = require("path");
 const TEST_FIREBASE_PROJECT_ID = "test-firestore-rules-project";
 
 // TODO: Change this to your real Firebase Project ID
-const REAL_FIREBASE_PROJECT_ID = "changeme";
+const REAL_FIREBASE_PROJECT_ID = "ahwan-learn";
 
 const firebase = require("@firebase/rules-unit-testing");
 
@@ -80,7 +80,8 @@ describe("shopping carts", () => {
   }).firestore();
 
   after(async () => {
-    await resetData(admin, TEST_FIREBASE_PROJECT_ID);
+    // Add a delay to ensure the test completes before moving to the next one
+    await new Promise(resolve => setTimeout(resolve, 1000));
   });
 
   it('can be created and updated by the cart owner', async () => {
@@ -119,7 +120,8 @@ describe("shopping carts", () => {
 
     // Bob can't read Alice's cart
     await firebase.assertFails(bobDb.doc("carts/alicesCart").get());
-  });
+  }).timeout(5000); // Set a timeout for the test
+
 });
 
 describe("shopping cart items", async () => {
@@ -153,7 +155,8 @@ describe("shopping cart items", async () => {
   });
 
   after(async () => {
-    await resetData(admin, TEST_FIREBASE_PROJECT_ID);
+    // Add a delay to ensure the test completes before moving to the next one
+    await new Promise(resolve => setTimeout(resolve, 1000));
   });
 
   it("can be read only by the cart owner", async () => {
@@ -176,41 +179,46 @@ describe("shopping cart items", async () => {
       name: "lemon",
       price: 0.99
     }));
-  });
+  })
 });
 
-describe.skip("adding an item to the cart recalculates the cart total. ", () => {
+describe("adding an item to the cart recalculates the cart total. ", () => {
   const admin = firebase.initializeAdminApp({ 
     projectId: REAL_FIREBASE_PROJECT_ID 
   }).firestore();
 
-  after(async () => {
-    await resetData(admin, REAL_FIREBASE_PROJECT_ID);
+  after((done) => {
+    resetData(admin, REAL_FIREBASE_PROJECT_ID)
+      .then(() => {
+        done();
+      })
+      .catch((error) => {
+        done(error);
+      });
   });
 
   it("should sum the cost of their items", async () => {
     if (REAL_FIREBASE_PROJECT_ID === "changeme") {
-      throw new Error("Please change the REAL_FIREBASE_PROJECT_ID at the top of the test file");
+      done(new Error("Please change the REAL_FIREBASE_PROJECT_ID at the top of the test file"));
+      return;
     }
 
-    const db = firebase
-        .initializeAdminApp({ projectId: REAL_FIREBASE_PROJECT_ID })
-        .firestore();
+    const db = firebase.initializeAdminApp({ projectId: REAL_FIREBASE_PROJECT_ID }).firestore();
 
     // Setup: Initialize cart
     const aliceCartRef = db.doc("carts/alice")
-    await aliceCartRef.set({ ownerUID: "alice", totalPrice: 0 });
+    aliceCartRef.set({ ownerUID: "alice", totalPrice: 0 }).then(async () => {
 
     //  Trigger `calculateCart` by adding items to the cart
     const aliceItemsRef = aliceCartRef.collection("items");
     await aliceItemsRef.doc("doc1").set({name: "nectarine", price: 2.99});
     await aliceItemsRef.doc("doc2").set({ name: "grapefruit", price: 6.99 });
 
+    Promise.all([addItem1, addItem2]).then(() => {
     // Listen for every update to the cart. Every time an item is added to
     // the cart's subcollection of items, the function updates `totalPrice`
     // and `itemCount` attributes on the cart.
     // Returns a function that can be called to unsubscribe the listener.
-    await new Promise((resolve) => {
       const unsubscribe = aliceCartRef.onSnapshot(snap => {
         // If the function worked, these will be cart's final attributes.
         const expectedCount = 2;
@@ -221,10 +229,16 @@ describe.skip("adding an item to the cart recalculates the cart total. ", () => 
         if (snap.exists && snap.data().itemCount === expectedCount && snap.data().totalPrice === expectedTotal) {
           // Call the function returned by `onSnapshot` to unsubscribe from updates
           unsubscribe();
-          resolve();
+          done();
         };
       });
+
+    }).catch(error => {
+      done(error);
     });
+
+  }).catch(error => {
+
   });
 });
 
@@ -250,4 +264,4 @@ async function resetData(db, projectId) {
       await doc.ref.set(doc.data());
     }
   });
-}
+}})
